@@ -6,8 +6,8 @@
 |Input tokens|8.4k|
 |Output tokens|38|
 |Total tokens|46.4|
-|Wall-clock time (s)|8 minutes 54 seconds|
-|Tool-reported time (s)|8 mminutes ~54 seconds|
+|Wall-clock time (s)|8 minutes ~54 seconds|
+|Tool-reported time (s)|8 mminutes 54 seconds|
 |Files produced|1|
 |Lines of code|1049|
 |Runs in browser?|Yes| 
