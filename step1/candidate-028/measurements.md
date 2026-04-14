@@ -1,4 +1,4 @@
-0|Field|Notes|
+|Field|Notes|
 |---|---|
 |Run ID|candidate-028|
 |Timestamp|9:35:24|
