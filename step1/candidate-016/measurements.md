@@ -7,7 +7,7 @@
 |Output tokens|3k|
 |Total tokens|3k|
 |Wall-clock time (s)|1 minute 36 seconds|
-|Tool-reported time (s)|27 seconds|
+|Tool-reported time (s)|1 minute 36 seconds|
 |Files produced|1|
 |Lines of code|269|
 |Runs in browser?|Yes
