@@ -3,7 +3,7 @@ This is the repository for KnowIdea's work in creating and analyzing separate ge
 
 We are going to be using Anthropic's Claude Code. 
 
-As of 4/12/26 the latest version is version 2.1.105 which we will be using as the harness for our work.
+As of 4/12/26 the latest version is version 2.1.105 which we will be using as the harness for our work. Please note that everything should be done in sonnet 4.6 with extended thinking turned off.
 
 ## Below is a list of steps that you should take when starting on your assigned generations:
 1. Read through this whole list before you start working! Trust me, there are some weird specifics that we have to look out for.
