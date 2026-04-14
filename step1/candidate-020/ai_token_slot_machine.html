@@ -1,0 +1,310 @@
+
+<style>
+  :root { --reel-h: 90px; }
+  #slot-root { padding: 1.5rem 0; font-family: var(--font-sans); max-width: 480px; margin: 0 auto; }
+  .machine-body { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; }
+  .screen-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .token-display { display: flex; gap: 1.5rem; }
+  .tok { text-align: center; }
+  .tok-label { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+  .tok-val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .tok-val.winning { color: #1D9E75; }
+  .tok-val.losing  { color: #D85A30; }
+  .reels-wrap { display: flex; gap: 10px; margin: 0 0 1rem; }
+  .reel-outer { flex: 1; height: var(--reel-h); overflow: hidden; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); position: relative; }
+  .reel-strip { position: absolute; top: 0; left: 0; width: 100%; transition: top 0.05s linear; }
+  .reel-cell { height: var(--reel-h); display: flex; align-items: center; justify-content: center; font-size: 38px; }
+  .win-line { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--color-border-secondary); pointer-events: none; transform: translateY(-50%); }
+  .controls { display: flex; align-items: center; gap: 10px; }
+  .bet-group { display: flex; align-items: center; gap: 6px; flex: 1; }
+  .bet-group label { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; }
+  .bet-group input { width: 100%; }
+  .bet-val { font-size: 13px; font-weight: 500; min-width: 26px; }
+  button#spin-btn { padding: 8px 22px; font-size: 14px; font-weight: 500; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; color: var(--color-text-primary); transition: background 0.15s; white-space: nowrap; }
+  button#spin-btn:hover { background: var(--color-background-secondary); }
+  button#spin-btn:active { transform: scale(0.97); }
+  button#spin-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .msg-box { min-height: 36px; text-align: center; font-size: 13px; color: var(--color-text-secondary); margin-top: 0.75rem; padding: 6px 8px; border-radius: var(--border-radius-md); transition: background 0.2s; }
+  .msg-box.win { background: #E1F5EE; color: #0F6E56; }
+  .msg-box.lose { background: #FAECE7; color: #993C1D; }
+  .msg-box.jackpot { background: #FAEEDA; color: #633806; font-weight: 500; font-size: 14px; }
+  .history { margin-top: 1rem; border-top: 0.5px solid var(--color-border-tertiary); padding-top: 0.75rem; }
+  .history-title { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .history-list { display: flex; flex-direction: column; gap: 3px; max-height: 100px; overflow-y: auto; }
+  .h-row { font-size: 12px; color: var(--color-text-secondary); display: flex; justify-content: space-between; }
+  .h-row .h-amt { font-weight: 500; }
+  .h-row .h-amt.w { color: #1D9E75; }
+  .h-row .h-amt.l { color: #D85A30; }
+</style>
+
+<div id="slot-root">
+  <h2 class="sr-only" style="position:absolute;left:-9999px">AI Token Slot Machine — spend tokens, win tokens</h2>
+  <div class="machine-body">
+    <div class="screen-bar">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">AI Token Casino</div>
+      <div class="token-display">
+        <div class="tok">
+          <div class="tok-label">Tokens</div>
+          <div class="tok-val" id="tok-count">1000</div>
+        </div>
+        <div class="tok">
+          <div class="tok-label">Burned</div>
+          <div class="tok-val" id="tok-burned">0</div>
+        </div>
+        <div class="tok">
+          <div class="tok-label">Won</div>
+          <div class="tok-val" id="tok-won">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reels-wrap" id="reels-wrap">
+    </div>
+
+    <div class="controls">
+      <div class="bet-group">
+        <label for="bet-slider">Bet</label>
+        <input type="range" id="bet-slider" min="1" max="5" step="1" value="1">
+        <span class="bet-val" id="bet-val">10</span>
+        <span style="font-size:12px;color:var(--color-text-tertiary)">tok</span>
+      </div>
+      <button id="spin-btn">Spin ↯</button>
+    </div>
+
+    <div class="msg-box" id="msg-box">Feed me tokens and watch me hallucinate results.</div>
+
+    <div class="history">
+      <div class="history-title">Session log</div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SYMBOLS = [
+  { icon: '🤖', name: 'Robot',    weight: 20 },
+  { icon: '🧠', name: 'Brain',    weight: 18 },
+  { icon: '💬', name: 'Prompt',   weight: 18 },
+  { icon: '📊', name: 'Dataset',  weight: 15 },
+  { icon: '🔥', name: 'GPU Fire', weight: 12 },
+  { icon: '💀', name: 'Hallucination', weight: 10 },
+  { icon: '🎰', name: 'Jackpot',  weight: 7  },
+];
+
+const BET_AMOUNTS = [10, 25, 50, 100, 250];
+const NUM_REELS = 3;
+const REEL_H = 90;
+const STRIP_REPEAT = 20;
+
+const WIN_MSGS = [
+  (sym, mul) => `${sym} match! ${mul}x multiplier. Your prompt worked... this time.`,
+  (sym, mul) => `Three ${sym}s! Even a stopped clock is right twice a day.`,
+  (sym, mul) => `${sym} ${sym} ${sym}! The model got lucky. It usually doesn't.`,
+];
+const LOSE_MSGS = [
+  'Tokens incinerated. The GPU thanks you.',
+  'No match. Your prompt was probably ambiguous.',
+  'Loss detected. Updating my training data on your failure.',
+  'Compute consumed. Output: nothing useful.',
+  'Context window closed. Tokens gone.',
+  'I hallucinated a win for you, but this is reality.',
+  'Spinning costs tokens. Losing costs dignity.',
+  'Error 404: Your winnings not found.',
+  'The model has decided you do not deserve tokens today.',
+];
+const JACKPOT_MSGS = [
+  '🎰 JACKPOT! You beat the RNG! Screenshot this — it won't happen again.',
+  '🎰 THREE JACKPOTS! I promise this wasn't in my training data.',
+  '🎰 MAXIMUM TOKENS! This is statistically improbable. I'm impressed.',
+];
+
+let tokens = 1000, totalBurned = 0, totalWon = 0;
+let spinning = false;
+let betIndex = 0;
+
+const reelsWrap = document.getElementById('reels-wrap');
+const spinBtn = document.getElementById('spin-btn');
+const msgBox = document.getElementById('msg-box');
+const histList = document.getElementById('history-list');
+const betSlider = document.getElementById('bet-slider');
+const betVal = document.getElementById('bet-val');
+
+function weightedPick() {
+  const total = SYMBOLS.reduce((s, sym) => s + sym.weight, 0);
+  let r = Math.random() * total;
+  for (const sym of SYMBOLS) { r -= sym.weight; if (r <= 0) return sym; }
+  return SYMBOLS[0];
+}
+
+function buildStrip(reel) {
+  const strip = document.createElement('div');
+  strip.className = 'reel-strip';
+  for (let i = 0; i < STRIP_REPEAT; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'reel-cell';
+    cell.textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)].icon;
+    strip.appendChild(cell);
+  }
+  return strip;
+}
+
+const reelEls = [];
+for (let i = 0; i < NUM_REELS; i++) {
+  const outer = document.createElement('div');
+  outer.className = 'reel-outer';
+  const strip = buildStrip(i);
+  outer.appendChild(strip);
+  const line = document.createElement('div');
+  line.className = 'win-line';
+  outer.appendChild(line);
+  reelsWrap.appendChild(outer);
+  reelEls.push({ outer, strip, current: 0 });
+}
+
+function showResult(symbols) {
+  reelEls.forEach((r, i) => {
+    const cells = r.strip.children;
+    const targetIdx = STRIP_REPEAT - 3;
+    cells[targetIdx].textContent = symbols[i].icon;
+  });
+}
+
+function spinReel(reelIdx, symbol, delay) {
+  return new Promise(resolve => {
+    const r = reelEls[reelIdx];
+    const strip = r.strip;
+    const cells = strip.children;
+    const totalH = STRIP_REPEAT * REEL_H;
+    let pos = 0;
+    strip.style.transition = 'none';
+    strip.style.top = '0px';
+
+    const targetIdx = STRIP_REPEAT - 2;
+    cells[targetIdx].textContent = symbol.icon;
+
+    const targetPos = -((targetIdx - 1) * REEL_H);
+    const speed = 18;
+    let traveled = 0;
+    const minTravel = 300 + delay * 80 + Math.random() * 200;
+
+    setTimeout(() => {
+      let raf;
+      function tick() {
+        traveled += speed;
+        pos -= speed;
+        if (pos < -totalH + REEL_H * 3) pos += totalH - REEL_H * 3;
+        if (traveled < minTravel) {
+          strip.style.transition = 'none';
+          strip.style.top = pos + 'px';
+          raf = requestAnimationFrame(tick);
+        } else {
+          strip.style.transition = 'top 0.35s cubic-bezier(0.22,1,0.36,1)';
+          strip.style.top = targetPos + 'px';
+          setTimeout(resolve, 380);
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    }, 0);
+  });
+}
+
+function updateUI() {
+  const tc = document.getElementById('tok-count');
+  const tb = document.getElementById('tok-burned');
+  const tw = document.getElementById('tok-won');
+  tc.textContent = tokens.toLocaleString();
+  tb.textContent = totalBurned.toLocaleString();
+  tw.textContent = totalWon.toLocaleString();
+}
+
+function addHistory(symbols, amount, won) {
+  const row = document.createElement('div');
+  row.className = 'h-row';
+  const icons = symbols.map(s => s.icon).join(' ');
+  const amtSpan = `<span class="h-amt ${won > 0 ? 'w' : 'l'}">${won > 0 ? '+' + won : '-' + amount} tok</span>`;
+  row.innerHTML = `<span>${icons}</span>${amtSpan}`;
+  histList.prepend(row);
+  if (histList.children.length > 8) histList.lastChild.remove();
+}
+
+function getMultiplier(symbol) {
+  if (symbol.name === 'Jackpot')        return 20;
+  if (symbol.name === 'GPU Fire')       return 10;
+  if (symbol.name === 'Hallucination')  return 8;
+  if (symbol.name === 'Dataset')        return 6;
+  if (symbol.name === 'Brain')          return 4;
+  if (symbol.name === 'Prompt')         return 3;
+  if (symbol.name === 'Robot')          return 2;
+  return 2;
+}
+
+betSlider.addEventListener('input', () => {
+  betIndex = parseInt(betSlider.value) - 1;
+  betVal.textContent = BET_AMOUNTS[betIndex];
+});
+
+spinBtn.addEventListener('click', async () => {
+  if (spinning) return;
+  const bet = BET_AMOUNTS[betIndex];
+  if (tokens < bet) {
+    setMsg('Out of tokens. The model refuses to work for free.', 'lose');
+    return;
+  }
+  spinning = true;
+  spinBtn.disabled = true;
+  tokens -= bet;
+  totalBurned += bet;
+  updateUI();
+  setMsg('Computing... burning your tokens...', '');
+
+  const chosen = [weightedPick(), weightedPick(), weightedPick()];
+
+  await Promise.all(chosen.map((sym, i) => spinReel(i, sym, i)));
+
+  const isWin = chosen[0].name === chosen[1].name && chosen[1].name === chosen[2].name;
+  let wonAmt = 0;
+
+  if (isWin) {
+    const mul = getMultiplier(chosen[0]);
+    wonAmt = bet * mul;
+    tokens += wonAmt;
+    totalWon += wonAmt;
+    updateUI();
+    if (chosen[0].name === 'Jackpot') {
+      setMsg(JACKPOT_MSGS[Math.floor(Math.random() * JACKPOT_MSGS.length)], 'jackpot');
+    } else {
+      const msgFn = WIN_MSGS[Math.floor(Math.random() * WIN_MSGS.length)];
+      setMsg(msgFn(chosen[0].icon, mul), 'win');
+    }
+    reelEls.forEach(r => {
+      r.outer.style.borderColor = '#1D9E75';
+      setTimeout(() => r.outer.style.borderColor = '', 1000);
+    });
+  } else {
+    const msg = LOSE_MSGS[Math.floor(Math.random() * LOSE_MSGS.length)];
+    setMsg(msg, 'lose');
+    updateUI();
+  }
+
+  addHistory(chosen, bet, wonAmt);
+
+  if (tokens <= 0) {
+    tokens = 0;
+    updateUI();
+    setMsg('Bankrupt. The GPU cluster consumed your entire balance. Classic AI.', 'lose');
+    spinBtn.textContent = 'No tokens left';
+    spinning = false;
+    return;
+  }
+
+  spinning = false;
+  spinBtn.disabled = false;
+});
+
+function setMsg(text, cls) {
+  msgBox.textContent = text;
+  msgBox.className = 'msg-box ' + cls;
+}
+
+updateUI();
+</script>
