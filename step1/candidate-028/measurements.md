@@ -1,11 +1,11 @@
-|Field|Notes|
+0|Field|Notes|
 |---|---|
 |Run ID|candidate-028|
 |Timestamp|9:35:24|
 |Model + version string|Sonnet 4.6 2.1.205|
 |Input tokens|8.4k|
 |Output tokens|38|
-|Total tokens|46.4|
+|Total tokens|46.4k|
 |Wall-clock time (s)|8 minutes ~54 seconds|
 |Tool-reported time (s)|8 mminutes 54 seconds|
 |Files produced|1|
