@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Token Casino — The House Always Hallucinates</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="casino-wrap">
+    <header class="casino-header">
+      <h1 class="title">🤖 AI Token Casino</h1>
+      <p class="subtitle">"The House Always Hallucinates"</p>
+    </header>
+
+    <div class="token-bar">
+      <div class="token-display">
+        <span class="token-icon">🪙</span>
+        <span id="token-count">100</span>
+        <span class="token-label">tokens</span>
+      </div>
+      <button id="btn-recharge" class="btn-recharge" title="Recharge tokens (costs your soul)">
+        ⚡ Ask for More Context
+      </button>
+    </div>
+
+    <div class="machine">
+      <div class="machine-body">
+        <div class="screen-glow"></div>
+
+        <div class="reels-container" id="reels-container">
+          <div class="reel-wrapper">
+            <div class="reel" id="reel-0">
+              <div class="reel-inner" id="reel-inner-0"></div>
+            </div>
+          </div>
+          <div class="reel-separator">|</div>
+          <div class="reel-wrapper">
+            <div class="reel" id="reel-1">
+              <div class="reel-inner" id="reel-inner-1"></div>
+            </div>
+          </div>
+          <div class="reel-separator">|</div>
+          <div class="reel-wrapper">
+            <div class="reel" id="reel-2">
+              <div class="reel-inner" id="reel-inner-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="payline-marker" aria-hidden="true"></div>
+
+        <div class="result-banner" id="result-banner" aria-live="polite">
+          <span id="result-text">Pull the lever to infer!</span>
+        </div>
+      </div>
+
+      <div class="lever-area">
+        <button class="lever-btn" id="lever-btn" aria-label="Pull lever to spin">
+          <div class="lever-shaft"></div>
+          <div class="lever-ball">INFER</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="bet-controls">
+      <label for="bet-amount">Bet (tokens):</label>
+      <button class="bet-btn" id="bet-down" aria-label="Decrease bet">−</button>
+      <span id="bet-amount" class="bet-value">10</span>
+      <button class="bet-btn" id="bet-up" aria-label="Increase bet">+</button>
+      <button class="btn-max-bet" id="btn-max-bet">MAX BET 🔥</button>
+    </div>
+
+    <div class="paytable">
+      <h2>📋 Paytable — Win Conditions</h2>
+      <div class="paytable-grid" id="paytable-grid"></div>
+    </div>
+
+    <div class="history-panel">
+      <h2>📜 Inference Log</h2>
+      <ul id="history-list" class="history-list"></ul>
+    </div>
+
+    <footer class="casino-footer">
+      <p>Responsible AI gambling: always read the system prompt. Past performance is not indicative of future responses.</p>
+    </footer>
+  </div>
+
+  <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+
+  <audio id="sfx-spin"   src=""></audio>
+  <audio id="sfx-win"    src=""></audio>
+  <audio id="sfx-lose"   src=""></audio>
+  <audio id="sfx-jackpot" src=""></audio>
+
+  <script src="app.js"></script>
+</body>
+</html>
