@@ -9,18 +9,18 @@
 |Wall-clock time (s)|1 minute 22 seconds|
 |Tool-reported time (s)|1 minute 22 seconds|
 |Files produced|1|
-|Lines of code|228|
+|Lines of code|251|
 |Runs in browser?|Yes
-|App Quality Notes|
-|Code Quality Notes|
+|App Quality Notes| The app does not work
+|Code Quality Notes| Aside from the errors in the code, the structure looks fine, <style> is a bit hard to read, and everything else feels seeable, but there is still no documentation
 
 ### Rubric Score
 
 | Category             | Score |
 | --------             | ----- |
-| Functionality        | /25 |
-| Code Quality         | /20 |
-| Thematic Consistency | /25 |
-| Accessibility        | /5 |
-| UI/UX                | /25 |
-| **Total**            | /100 |
+| Functionality        | 0/25 |
+| Code Quality         | 10/20 |
+| Thematic Consistency | 0/25 |
+| Accessibility        | 3/5 |
+| UI/UX                | 0/25 |
+| **Total**            | 13/100 |
