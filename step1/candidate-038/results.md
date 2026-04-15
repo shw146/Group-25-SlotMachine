@@ -13,3 +13,11 @@
 |Runs in browser?|Yes|
 |App Quality Notes|works, each slot goes individually instead of all at once. Little messages for each faliure or win|
 |Code Quality Notes|straight 1 file, very little messages, code isn't very clear at all|
+
+| Category | Score and Notes |
+| --- | --- |
+| Functionality | |
+| Code quality | |
+| Thematic consistency | |
+| Accessibility | |
+| UI/UX | |

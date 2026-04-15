@@ -13,3 +13,11 @@
 |Runs in browser?|Yes|
 |App Quality Notes|almost works. When you splin you see emojis but when it lands they disapear, you get some kind of result but no way to verify|
 |Code Quality Notes|its like straight code, little to no comments, not very readible|
+
+| Category | Score and Notes |
+| --- | --- |
+| Functionality | 10 |
+| Code quality | 10 |
+| Thematic consistency | 5 |
+| Accessibility | 5 |
+| UI/UX | 15|

@@ -13,3 +13,11 @@
 |Runs in browser?|Yes|
 |App Quality Notes|The app works, the payouts seem to be correct, couldn't get 3 matching|
 |Code Quality Notes|Code quality is very good, code seems to be bunched up in a nice format, the comments help split up the code. Uses divs over and over again for html|
+
+| Category | Score and Notes |
+| --- | --- |
+| Functionality | 25 |
+| Code quality | 18 |
+| Thematic consistency | 24 |
+| Accessibility | 5 |
+| UI/UX | 25|

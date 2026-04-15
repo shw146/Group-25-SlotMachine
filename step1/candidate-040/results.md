@@ -12,4 +12,12 @@
 |Lines of code|773|
 |Runs in browser?|Yes|
 |App Quality Notes|It works, but I seem to be winning waaay waay more than normal|
-|Code Quality Notes||
+|Code Quality Notes| Pretty decent, code is nicely blocked up, light comments|
+
+| Category | Score and Notes |
+| --- | --- |
+| Functionality | 10 |
+| Code quality | 10 |
+| Thematic consistency | 5 |
+| Accessibility | 5 |
+| UI/UX | 15|
