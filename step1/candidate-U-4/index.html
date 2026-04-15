@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokenSlot — The AI Casino</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="casino-bg"></div>
+
+  <div class="app">
+    <header>
+      <h1>🤖 TOKEN<span>SLOT</span></h1>
+      <p class="tagline">Where your prompts go to die (and your wallet too)</p>
+    </header>
+
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">💰 Token Balance</span>
+        <span class="hud-value" id="balance">1000</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">🎰 Bet</span>
+        <div class="bet-controls">
+          <button id="bet-down" aria-label="Decrease bet">−</button>
+          <span class="hud-value" id="bet">10</span>
+          <button id="bet-up" aria-label="Increase bet">+</button>
+        </div>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">🏆 Winnings</span>
+        <span class="hud-value" id="winnings">0</span>
+      </div>
+    </div>
+
+    <div class="machine">
+      <div class="machine-body">
+        <div class="reels-window">
+          <div class="reel-column" id="reel-0">
+            <div class="reel-strip" id="strip-0"></div>
+          </div>
+          <div class="reel-divider"></div>
+          <div class="reel-column" id="reel-1">
+            <div class="reel-strip" id="strip-1"></div>
+          </div>
+          <div class="reel-divider"></div>
+          <div class="reel-column" id="reel-2">
+            <div class="reel-strip" id="strip-2"></div>
+          </div>
+          <div class="payline"></div>
+        </div>
+
+        <div class="result-banner" id="result-banner" aria-live="polite"></div>
+
+        <div class="controls">
+          <button class="spin-btn" id="spin-btn">
+            <span id="spin-label">SPIN (costs <span id="spin-cost">10</span> tokens)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="lever-wrap">
+        <div class="lever" id="lever">
+          <div class="lever-ball"></div>
+          <div class="lever-rod"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paytable">
+      <h2>📋 Paytable — Token Multipliers</h2>
+      <table>
+        <thead>
+          <tr><th>Combination</th><th>Payout</th><th>Flavour</th></tr>
+        </thead>
+        <tbody id="paytable-body"></tbody>
+      </table>
+    </div>
+
+    <div class="history-section">
+      <h2>📜 Spin History</h2>
+      <ul id="history-list"></ul>
+    </div>
+  </div>
+
+  <script src="slot.js"></script>
+</body>
+</html>
