@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Token Slots™</title>
+  <link rel="stylesheet" href="slot.css" />
+</head>
+<body class="theme-neon">
+
+  <!-- Coin/particle effects spawned by JS are placed here (fixed overlay) -->
+  <div id="particleLayer" aria-hidden="true"></div>
+
+  <!-- Outer wrapper: machine cabinet on left, pull lever on right -->
+  <div class="machine-wrapper">
+
+    <!-- ═══════════════════════════════════════
+         SLOT MACHINE CABINET
+    ═══════════════════════════════════════ -->
+    <div class="machine" id="machine">
+
+      <!-- Neon sign header -->
+      <div class="title">
+        <h1>&#9881; AI TOKEN SLOTS&#8482;</h1>
+        <div class="subtitle">SPEND TOKENS &middot; WIN TOKENS &middot; REPEAT UNTIL AGI</div>
+      </div>
+
+      <!-- Top bar: live AI status ticker + theme cycle button -->
+      <div class="top-bar">
+        <div class="ticker">
+          <div class="ticker-dot" aria-hidden="true"></div>
+          <div class="ticker-text" id="tickerText">SYSTEM ONLINE</div>
+        </div>
+        <button id="themeBtn" class="theme-btn" title="Cycle color theme">&#9680; THEME</button>
+      </div>
+
+      <!-- Wallet balance, spin count, tokens burned -->
+      <div class="stats-bar">
+        <div class="stat">
+          <div class="stat-label">WALLET</div>
+          <div class="stat-value gold" id="balanceEl">100 &#129689;</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">SPINS</div>
+          <div class="stat-value cyan" id="spinsEl">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">BURNED</div>
+          <div class="stat-value red" id="spentEl">0 &#129689;</div>
+        </div>
+      </div>
+
+      <!-- ── Payline indicators + three spinning reels ──
+           Each reel shows 3 rows simultaneously.
+           The center (middle) row is the active payline. -->
+      <div class="reels-section">
+
+        <!-- Left arrow markers: one per visible row; middle is the active payline -->
+        <div class="payline-col" aria-label="Payline markers">
+          <div class="payline-pip row-top">&#8212;</div>
+          <div class="payline-pip row-mid active" title="Active payline">&#9654;</div>
+          <div class="payline-pip row-bot">&#8212;</div>
+        </div>
+
+        <!-- The three reel columns; each strip scrolls vertically through symbols -->
+        <div class="reels-wrap">
+          <div class="reel-outer" id="reel0">
+            <div class="reel-strip" id="strip0"></div>
+          </div>
+          <div class="reel-outer" id="reel1">
+            <div class="reel-strip" id="strip1"></div>
+          </div>
+          <div class="reel-outer" id="reel2">
+            <div class="reel-strip" id="strip2"></div>
+          </div>
+        </div>
+
+        <!-- Right arrow markers (mirror of left side) -->
+        <div class="payline-col" aria-label="Payline markers right">
+          <div class="payline-pip row-top">&#8212;</div>
+          <div class="payline-pip row-mid active">&#9664;</div>
+          <div class="payline-pip row-bot">&#8212;</div>
+        </div>
+
+      </div><!-- /reels-section -->
+
+      <!-- Bet controls and spin button -->
+      <div class="controls">
+        <button id="betDown" title="Decrease bet">&#9664; BET</button>
+        <div class="bet-box">
+          <div class="bl">BET</div>
+          <div class="bv" id="betEl">10 &#129689;</div>
+        </div>
+        <button id="betUp" title="Increase bet">BET &#9654;</button>
+        <button id="spinBtn" title="Spin reels (Space / Enter)">&#9654; SPIN</button>
+        <button id="maxBtn" title="Set maximum affordable bet">MAX</button>
+      </div>
+
+      <!-- Result / game message panel; aria-live so screen readers announce results -->
+      <div class="msg-area" id="msgArea" role="status" aria-live="polite">
+        &gt; Initializing inference engine...<br />
+        &gt; Awaiting input to generate probabilistic loss...
+      </div>
+
+      <!-- ── Collapsible spin history log ──
+           Shows last 30 spins; newest entry at top -->
+      <div class="history-section">
+        <button class="history-header" id="historyToggle" aria-expanded="false">
+          <span class="history-title-text">&#8212;&#8212; SPIN LOG &#8212;&#8212;</span>
+          <span class="history-count" id="historyCount">0 spins</span>
+          <span class="history-arrow" id="historyArrow" aria-hidden="true">&#9660;</span>
+        </button>
+        <!-- Scrollable entry list; toggled open/closed by JS -->
+        <div class="history-list" id="historyList" aria-label="Spin history">
+          <div class="history-empty">No spins yet. Pull the lever or press SPIN.</div>
+        </div>
+      </div>
+
+      <!-- Payout reference table so players know the reward schedule -->
+      <div class="payouts">
+        <div class="pay-title">&#8212;&#8212; TOKENOMICS / REWARD SCHEDULE &#8212;&#8212;</div>
+        <div class="pay-grid">
+          <div class="pay-row"><span>&#129302;&#129302;&#129302;</span><span>JACKPOT &times;500</span></div>
+          <div class="pay-row"><span>&#129504;&#129504;&#129504;</span><span>&times;10</span></div>
+          <div class="pay-row"><span>&#128640;&#128640;&#128640;</span><span>&times;7</span></div>
+          <div class="pay-row"><span>&#129689;&#129689;&#129689;</span><span>&times;5</span></div>
+          <div class="pay-row"><span>&#9889;&#9889;&#9889;</span><span>&times;3</span></div>
+          <div class="pay-row"><span>&#128293;&#128293;&#128293;</span><span>&times;2</span></div>
+          <div class="pay-row"><span>Any pair</span><span>&times;0.5</span></div>
+          <div class="pay-row"><span>No match</span><span>&#8722;bet</span></div>
+        </div>
+      </div>
+
+    </div><!-- /machine -->
+
+    <!-- ═══════════════════════════════════════
+         PULL LEVER
+         Mounted to the right side of the machine.
+         Click or press Enter/Space while focused to pull.
+         The arm rotates down then springs back up,
+         triggering a spin.
+    ═══════════════════════════════════════ -->
+    <div class="lever-housing" id="leverHousing"
+         role="button" tabindex="0"
+         aria-label="Pull lever to spin"
+         title="Pull lever to spin">
+
+      <!-- Vertical "PULL" label above the arm -->
+      <div class="lever-label">PULL</div>
+
+      <!-- The track area the arm pivots within -->
+      <div class="lever-track">
+        <!-- Arm rotates around its bottom pivot point -->
+        <div class="lever-arm" id="leverArm">
+          <!-- Red glowing knob at the top of the arm -->
+          <div class="lever-knob" id="leverKnob"></div>
+          <!-- Metal shaft below the knob -->
+          <div class="lever-shaft"></div>
+        </div>
+      </div>
+
+      <!-- Chrome base plate the arm is anchored to -->
+      <div class="lever-base-plate">
+        <div class="lever-chrome-ring"></div>
+      </div>
+
+    </div><!-- /lever-housing -->
+
+  </div><!-- /machine-wrapper -->
+
+  <!-- All game logic: symbols, audio, spin animation, history, lever, themes -->
+  <script src="slot.js"></script>
+
+</body>
+</html>
