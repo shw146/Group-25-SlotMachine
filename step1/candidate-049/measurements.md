@@ -18,12 +18,12 @@
 
 | Category             | Score  |
 | -------------------- | ------ |
-| Functionality        | 23/25  |
+| Functionality        | 24/25  |
 | Code Quality         | 18/20  |
-| Thematic Consistency | 21/25  |
-| Accessibility        | 4/5    |
-| UI/UX                | 22/25  |
-| **Total**            | 88/100 |
+| Thematic Consistency | 23/25  |
+| Accessibility        | 3/5    |
+| UI/UX                | 25/25  |
+| **Total**            | 93/100 |
 
 ### App Quality Notes
 
