@@ -1,4 +1,4 @@
-Winner is candidate 29
+Winner is candidate 29, 30
 
 Notable changes:
 1. more contrast for dark mode
