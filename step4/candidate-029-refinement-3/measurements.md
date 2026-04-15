@@ -9,9 +9,9 @@
 | Run ID                 | candidate-029-refinement-3   |
 | Timestamp              | 2026-04-14T22:58:12Z         |
 | Model + version string | Claude Sonnet 4.6 (v2.1.109) |
-| Input tokens           | 6.3k                         |
-| Output tokens          | 45.4k                        |
-| Total tokens           | 51.7k                        |
+| Input tokens           | 4.3k                         |
+| Output tokens          | 12.4k                        |
+| Total tokens           | 16.7k                        |
 | Wall-clock time (s)    | 144.2                        |
 | Tool-reported time (s) | 144.2                        |
 | Files produced         | 3                            |
