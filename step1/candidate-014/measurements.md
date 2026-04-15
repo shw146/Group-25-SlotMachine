@@ -11,16 +11,16 @@
 |Files produced|1|
 |Lines of code|1070|
 |Runs in browser?|Yes
-|App Quality Notes| There is no view of the wheel spinning or the actual results of the wheel. Some words are hard to read since they blend in.
-|Code Quality Notes| The code looks fine. It looks easy to look through and nothing jumps out as hard to read thanks to the documentation.
+|App Quality Notes| The wheel spins, but it looks too jittery. There are some things that are a bit hard to see, like the spin number and wins. It does play sounds
+|Code Quality Notes| The code looks fine. It looks easy to look through and nothing jumps out as hard to read thanks to the documentation. Although there is quite a bit around 680 to 760 that felt a bit confusing and couldn't follow properly.
 
 ### Rubric Score
 
 | Category | Score |
 | -------- | ----- |
-| Functionality | 18/25 |
-| Code Quality | 18/20 |
-| Thematic Consistency | 20/25 |
-| Accessibility | 2/5 |
-| UI/UX | 10/25 |
-| **Total** | 68/100 |
+| Functionality | 23/25 |
+| Code Quality | 16/20 |
+| Thematic Consistency | 21/25 |
+| Accessibility | 3/5 |
+| UI/UX | 16/25 |
+| **Total** | 79/100 |
