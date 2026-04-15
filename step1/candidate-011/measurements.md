@@ -12,15 +12,15 @@
 |Lines of code|931|
 |Runs in browser?|Yes
 |App Quality Notes| There is no view of the wheel spinning or the actual results of the wheel. Some words are hard to read since they blend in.
-|Code Quality Notes|
+|Code Quality Notes| The code looks fine. It looks easy to look through and nothing jumps out as hard to read thanks to the documentation.
 
 ### Rubric Score
 
 | Category | Score |
 | -------- | ----- |
-| Functionality | 22/25 |
-| Code Quality | 15/20 |
-| Thematic Consistency | 23/25 |
-| Accessibility | 1/5 |
-| UI/UX | 15/25 |
-| **Total** | 81/100 |
+| Functionality | 18/25 |
+| Code Quality | 18/20 |
+| Thematic Consistency | 20/25 |
+| Accessibility | 2/5 |
+| UI/UX | 10/25 |
+| **Total** | 68/100 |
