@@ -1,0 +1,357 @@
+// ─── SYMBOLS ────────────────────────────────────────────────────────────────
+const SYMBOLS = [
+  { emoji: '🤖', name: 'robot',       weight: 3, label: 'GPT-∞'         },
+  { emoji: '🧠', name: 'brain',       weight: 4, label: 'Neural Net'    },
+  { emoji: '💬', name: 'prompt',      weight: 5, label: 'Prompt'        },
+  { emoji: '📊', name: 'chart',       weight: 5, label: 'Benchmark'     },
+  { emoji: '🔥', name: 'fire',        weight: 6, label: 'GPU Fire'      },
+  { emoji: '💀', name: 'skull',       weight: 4, label: 'Hallucination' },
+  { emoji: '⚡', name: 'bolt',        weight: 6, label: 'Inference'     },
+  { emoji: '🎲', name: 'dice',        weight: 5, label: 'Stochastic'    },
+];
+
+// ─── PAYTABLE ────────────────────────────────────────────────────────────────
+// multiplier applied to bet
+const PAYTABLE = [
+  { name: 'robot',   mult: 50,  bigWin: true,  title: 'GENERAL INTELLIGENCE ACHIEVED',   sub: '...we think. The model can\'t explain its own reasoning but it\'s definitely smarter than you.' },
+  { name: 'skull',   mult: 30,  bigWin: true,  title: 'TRIPLE HALLUCINATION',             sub: 'All three outputs confidently agree on something completely false. That\'s called consensus.' },
+  { name: 'brain',   mult: 20,  bigWin: false, title: 'NEURAL COLLAPSE',                  sub: 'Congratulations, your weights have converged on the only truth that matters: token profit.' },
+  { name: 'prompt',  mult: 15,  bigWin: false, title: 'PROMPT INJECTION SUCCESS',         sub: 'You successfully convinced the machine. It now believes it\'s a pirate accountant.' },
+  { name: 'chart',   mult: 12,  bigWin: false, title: 'BENCHMARK CHEATING DETECTED',      sub: 'The model memorized the test set. 99.8% accuracy! Ship it.' },
+  { name: 'dice',    mult: 10,  bigWin: false, title: 'STOCHASTIC PARROT JACKPOT',        sub: 'Statistically likely tokens in a statistically likely order. You\'re welcome.' },
+  { name: 'fire',    mult: 8,   bigWin: false, title: 'GPU CLUSTER ON FIRE',              sub: 'The tokens you\'re winning cost $40,000 in compute to generate. Bargain.' },
+  { name: 'bolt',    mult: 6,   bigWin: false, title: 'INFERENCE COMPLETE',               sub: '47 milliseconds and 0.3 kWh later, you have your answer.' },
+];
+
+// ─── WIN MESSAGES FOR 2-MATCH ─────────────────────────────────────────────────
+const TWO_MATCH_MESSAGES = [
+  'Almost aligned! Like AGI — always almost there.',
+  'Close. The model says it\'s 95% confident you\'ll win next time.',
+  'Two out of three ain\'t bad. Unless you\'re a surgeon or a language model.',
+  'Partial credit! We call that "emergent near-winning behavior."',
+];
+
+// ─── LOSE MESSAGES ────────────────────────────────────────────────────────────
+const LOSE_MESSAGES = [
+  'Tokens burned. The GPU didn\'t even learn anything useful.',
+  'No match. The model confidently predicted you\'d win. It was wrong.',
+  'Loss detected. Have you tried adding more training data?',
+  'Negative reward signal. Updating policy... just kidding, we don\'t do that.',
+  'Hallucination: you almost saw a win. Reality: you lost.',
+  'The context window has forgotten your previous wins.',
+  'RLHF couldn\'t help you here. Humans also agreed this was a loss.',
+  'Insufficient tokens. Have you considered scaling up?',
+  'The model predicted 47 possible outcomes. This was none of them.',
+  'Attention mechanism attended to the wrong reels.',
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let balance = 100;
+let bet = 10;
+let totalWon = 0;
+let spinning = false;
+
+// ─── WEIGHTED RANDOM SYMBOL ───────────────────────────────────────────────────
+function weightedRandom() {
+  const totalWeight = SYMBOLS.reduce((s, sym) => s + sym.weight, 0);
+  let r = Math.random() * totalWeight;
+  for (const sym of SYMBOLS) {
+    r -= sym.weight;
+    if (r <= 0) return sym;
+  }
+  return SYMBOLS[SYMBOLS.length - 1];
+}
+
+// ─── BUILD WEIGHTED SYMBOL POOL ───────────────────────────────────────────────
+function buildPool(size = 40) {
+  const pool = [];
+  const totalWeight = SYMBOLS.reduce((s, sym) => s + sym.weight, 0);
+  for (const sym of SYMBOLS) {
+    const count = Math.round((sym.weight / totalWeight) * size);
+    for (let i = 0; i < count; i++) pool.push(sym);
+  }
+  // Shuffle
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
+}
+
+// ─── REEL STATE ───────────────────────────────────────────────────────────────
+const reelState = [
+  { pool: [], offset: 0, finalIdx: 0 },
+  { pool: [], offset: 0, finalIdx: 0 },
+  { pool: [], offset: 0, finalIdx: 0 },
+];
+
+const REEL_SIZE = 120; // px, matches --reel-size
+
+function initReels() {
+  for (let r = 0; r < 3; r++) {
+    reelState[r].pool = buildPool(30);
+    reelState[r].offset = 0;
+    renderReel(r);
+  }
+}
+
+function renderReel(r) {
+  const inner = document.getElementById(`reel-inner-${r}`);
+  inner.innerHTML = '';
+  const pool = reelState[r].pool;
+  // Render enough symbols to fill + scroll
+  const extra = 6;
+  for (let i = 0; i < pool.length + extra; i++) {
+    const sym = pool[i % pool.length];
+    const div = document.createElement('div');
+    div.className = 'symbol';
+    div.textContent = sym.emoji;
+    div.setAttribute('data-name', sym.name);
+    inner.appendChild(div);
+  }
+  setReelOffset(r, reelState[r].offset);
+}
+
+function setReelOffset(r, offset) {
+  reelState[r].offset = offset;
+  const inner = document.getElementById(`reel-inner-${r}`);
+  inner.style.transform = `translateY(-${offset}px)`;
+}
+
+function getVisibleSymbol(r) {
+  const pool = reelState[r].pool;
+  const totalPx = pool.length * REEL_SIZE;
+  const normalized = ((reelState[r].offset % totalPx) + totalPx) % totalPx;
+  const idx = Math.floor(normalized / REEL_SIZE) % pool.length;
+  return pool[idx];
+}
+
+// ─── SPIN ANIMATION ───────────────────────────────────────────────────────────
+function spinReel(r, duration, targetSymbol) {
+  return new Promise(resolve => {
+    const pool = reelState[r].pool;
+    const totalPx = pool.length * REEL_SIZE;
+    const startOffset = reelState[r].offset % totalPx;
+    const spinDistance = totalPx * (3 + r) + REEL_SIZE * Math.floor(Math.random() * pool.length);
+
+    // Find landing index that matches targetSymbol
+    let landingIdx = pool.findIndex(s => s.name === targetSymbol.name);
+    if (landingIdx === -1) landingIdx = 0;
+    const landingOffset = landingIdx * REEL_SIZE;
+
+    // Calculate total pixels to travel
+    const fullRotations = (3 + r) * totalPx;
+    const adjustedTarget = (Math.ceil((startOffset + fullRotations) / totalPx) * totalPx) + landingOffset;
+
+    const start = performance.now();
+    const initialOffset = startOffset;
+
+    function easeOut(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeOut(progress);
+      const currentOffset = initialOffset + (adjustedTarget - initialOffset) * eased;
+      setReelOffset(r, currentOffset % totalPx);
+
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        setReelOffset(r, landingOffset);
+        resolve();
+      }
+    }
+
+    requestAnimationFrame(tick);
+  });
+}
+
+// ─── CHECK WIN ────────────────────────────────────────────────────────────────
+function checkResult(results) {
+  const [a, b, c] = results;
+
+  // 3 of a kind
+  if (a.name === b.name && b.name === c.name) {
+    const entry = PAYTABLE.find(p => p.name === a.name);
+    if (entry) {
+      return { type: 'triple', mult: entry.mult, symbol: a, entry };
+    }
+    return { type: 'triple', mult: 5, symbol: a, entry: null };
+  }
+
+  // 2 of a kind
+  if (a.name === b.name || b.name === c.name || a.name === c.name) {
+    return { type: 'pair', mult: 1.5, symbol: null, entry: null };
+  }
+
+  return { type: 'none', mult: 0, symbol: null, entry: null };
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function updateUI() {
+  document.getElementById('balance').textContent = balance;
+  document.getElementById('bet').textContent = bet;
+  document.getElementById('total-won').textContent = totalWon;
+  document.getElementById('spin-cost').textContent = `(-${bet} tokens)`;
+  document.getElementById('spin-btn').disabled = spinning || balance < bet;
+  document.getElementById('bet-down').disabled = spinning || bet <= 5;
+  document.getElementById('bet-up').disabled = spinning || bet >= Math.min(balance, 100);
+}
+
+function showMessage(text, type = 'info') {
+  const box = document.getElementById('message-box');
+  const msg = document.getElementById('message-text');
+  box.className = `message-box ${type}`;
+  msg.textContent = text;
+}
+
+function flashBalance(type) {
+  const el = document.getElementById('balance');
+  el.classList.remove('flash-green', 'flash-red');
+  void el.offsetWidth;
+  el.classList.add(type === 'win' ? 'flash-green' : 'flash-red');
+}
+
+function setReelWinner(r, winner) {
+  const reel = document.getElementById(`reel-${r}`);
+  reel.classList.toggle('winner', winner);
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ─── BIG WIN OVERLAY ─────────────────────────────────────────────────────────
+function showBigWin(entry, winAmount) {
+  document.getElementById('win-emoji').textContent = SYMBOLS.find(s => s.name === entry.name)?.emoji || '🎉';
+  document.getElementById('win-title').textContent = entry.title;
+  document.getElementById('win-subtitle').textContent = entry.sub;
+  document.getElementById('win-amount').textContent = `+${winAmount} TOKENS`;
+  const overlay = document.getElementById('win-overlay');
+  overlay.classList.remove('hidden');
+}
+
+document.getElementById('win-overlay').addEventListener('click', () => {
+  document.getElementById('win-overlay').classList.add('hidden');
+});
+
+// ─── SPIN ─────────────────────────────────────────────────────────────────────
+async function spin() {
+  if (spinning || balance < bet) return;
+  spinning = true;
+  balance -= bet;
+  updateUI();
+
+  // Clear winner states
+  for (let r = 0; r < 3; r++) setReelWinner(r, false);
+  showMessage('Generating tokens... please wait... context window full...', 'info');
+
+  // Determine results first (so we can animate to them)
+  const results = [weightedRandom(), weightedRandom(), weightedRandom()];
+  const result = checkResult(results);
+
+  // Spin all reels simultaneously with staggered durations
+  const durations = [1800, 2200, 2600];
+  await Promise.all(results.map((sym, r) => spinReel(r, durations[r], sym)));
+
+  // Evaluate
+  if (result.type === 'triple') {
+    const winAmount = Math.round(bet * result.mult);
+    balance += winAmount;
+    totalWon += winAmount;
+    flashBalance('win');
+    for (let r = 0; r < 3; r++) setReelWinner(r, true);
+
+    if (result.entry?.bigWin) {
+      showBigWin(result.entry, winAmount);
+    } else {
+      const title = result.entry?.title || 'TRIPLE MATCH';
+      const sub = result.entry?.sub || 'The tokens have aligned.';
+      showMessage(`${result.symbol.emoji} ${title} — ${sub} (+${winAmount} tokens)`, 'win');
+    }
+  } else if (result.type === 'pair') {
+    const winAmount = Math.round(bet * result.mult);
+    balance += winAmount;
+    totalWon += winAmount;
+    flashBalance('win');
+    showMessage(`${pick(TWO_MATCH_MESSAGES)} (+${winAmount} tokens)`, 'win');
+  } else {
+    flashBalance('lose');
+    const machine = document.querySelector('.machine');
+    machine.classList.remove('shake');
+    void machine.offsetWidth;
+    machine.classList.add('shake');
+    showMessage(pick(LOSE_MESSAGES), 'lose');
+    setTimeout(() => machine.classList.remove('shake'), 500);
+  }
+
+  spinning = false;
+  updateUI();
+
+  if (balance < 5) {
+    showMessage('TOKEN EXHAUSTION. The model has run out of context. Click "BEG FOR TOKENS."', 'lose');
+    document.getElementById('spin-btn').disabled = true;
+  }
+}
+
+// ─── PAYTABLE RENDER ─────────────────────────────────────────────────────────
+function renderPaytable() {
+  const container = document.getElementById('pay-rows');
+  PAYTABLE.forEach(entry => {
+    const sym = SYMBOLS.find(s => s.name === entry.name);
+    const row = document.createElement('div');
+    row.className = 'pay-row';
+    row.innerHTML = `
+      <span class="pay-symbols">${sym.emoji}${sym.emoji}${sym.emoji}</span>
+      <span class="pay-multiplier">×${entry.mult}</span>
+    `;
+    row.title = entry.title;
+    container.appendChild(row);
+  });
+
+  // Add pair entry
+  const pairRow = document.createElement('div');
+  pairRow.className = 'pay-row';
+  pairRow.innerHTML = `<span class="pay-symbols">🎲🎲❓</span><span class="pay-multiplier">×1.5</span>`;
+  pairRow.title = 'Any two matching symbols';
+  container.appendChild(pairRow);
+}
+
+// ─── EVENT LISTENERS ─────────────────────────────────────────────────────────
+document.getElementById('spin-btn').addEventListener('click', spin);
+
+document.getElementById('bet-down').addEventListener('click', () => {
+  if (bet > 5) { bet = Math.max(5, bet - 5); updateUI(); }
+});
+
+document.getElementById('bet-up').addEventListener('click', () => {
+  if (bet < Math.min(balance, 100)) { bet = Math.min(100, balance, bet + 5); updateUI(); }
+});
+
+document.getElementById('max-bet-btn').addEventListener('click', () => {
+  if (!spinning) { bet = Math.min(balance, 100); updateUI(); }
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (spinning) return;
+  balance += 50;
+  showMessage('The VC has wired 50 tokens. Burn rate: 1 spin/sec. Runway: 50 spins.', 'info');
+  updateUI();
+});
+
+// Keyboard: Space to spin
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !e.target.matches('button')) {
+    e.preventDefault();
+    spin();
+  }
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+initReels();
+renderPaytable();
+updateUI();
+showMessage('Welcome. Please deposit tokens. They will be burned efficiently.', 'info');
