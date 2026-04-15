@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classic Slot Machine</title>
+  <style>
+    /* =========================================================
+       GLOBAL RESET & BASE
+       Light theme with bold high-contrast blacks/yellows/reds.
+       ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f0f0e8;           /* warm off-white background */
+      font-family: 'Courier New', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      user-select: none;             /* prevent text selection during drag */
+    }
+
+    /* =========================================================
+       CABINET — outer shell of the machine
+       ========================================================= */
+    #cabinet {
+      background: #1a1a1a;           /* near-black housing */
+      border: 6px solid #111;
+      border-radius: 18px;
+      padding: 24px 20px 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.55), inset 0 2px 6px rgba(255,255,255,.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      position: relative;           /* lever is absolute inside this */
+      width: 480px;
+    }
+
+    /* =========================================================
+       TITLE MARQUEE
+       ========================================================= */
+    #title {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #ffe135;               /* bright casino yellow */
+      text-shadow: 0 0 12px rgba(255,225,53,.6), 2px 2px 0 #b8860b;
+      text-transform: uppercase;
+    }
+
+    /* =========================================================
+       CREDIT & BET DISPLAY — top info row
+       ========================================================= */
+    #info-bar {
+      display: flex;
+      gap: 24px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .info-box {
+      background: #111;
+      border: 3px solid #ffe135;
+      border-radius: 8px;
+      padding: 6px 18px;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .info-label {
+      font-size: .65rem;
+      color: #aaa;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .info-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffe135;
+    }
+
+    /* =========================================================
+       SLOT WINDOW — the glass panel showing the reels
+       ========================================================= */
+    #slot-window {
+      background: #fff;
+      border: 5px solid #ffe135;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      gap: 0;
+      width: 360px;
+      height: 210px;                /* shows 3 rows × 70px each */
+      position: relative;
+      box-shadow: inset 0 0 18px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.5);
+    }
+
+    /* =========================================================
+       WIN-LINE OVERLAY
+       A red horizontal bar drawn at the middle row to highlight
+       the pay-line. Pointer-events:none so it doesn't block clicks.
+       ========================================================= */
+    #win-line {
+      position: absolute;
+      top: 70px;                    /* sits at start of middle row */
+      left: 0;
+      right: 0;
+      height: 70px;
+      border-top: 3px solid #e00;
+      border-bottom: 3px solid #e00;
+      pointer-events: none;
+      z-index: 10;
+      background: rgba(255,0,0,.05);
+    }
+
+    /* =========================================================
+       INDIVIDUAL REEL COLUMNS
+       Each reel is a tall strip that slides vertically.
+       overflow:hidden clips it to exactly 3 symbols.
+       ========================================================= */
+    .reel-col {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      border-right: 2px solid #ddd;
+    }
+    .reel-col:last-child { border-right: none; }
+
+    /* The inner strip — absolute positioned, moves via CSS transform */
+    .reel-strip {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;                       /* JS will set transform: translateY() */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Each symbol cell */
+    .symbol-cell {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+    }
+
+    /* =========================================================
+       WIN FLASH — flashes the winning middle-row cells
+       ========================================================= */
+    @keyframes winFlash {
+      0%, 100% { background: #fff; }
+      50%       { background: #ffe135; }
+    }
+    .symbol-cell.winning { animation: winFlash .45s ease-in-out 6; }
+
+    /* =========================================================
+       MESSAGE BANNER — shows WIN / LOSE etc.
+       ========================================================= */
+    #message {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      height: 28px;
+      color: #ffe135;
+      text-shadow: 1px 1px 0 #333;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* =========================================================
+       CONTROLS ROW — bet adjuster + spin + top-up
+       ========================================================= */
+    #controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Generic button style */
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: 1px;
+      transition: transform .08s, filter .08s;
+    }
+    button:active { transform: scale(.94); filter: brightness(.9); }
+
+    /* SPIN button — big yellow */
+    #btn-spin {
+      background: #ffe135;
+      color: #111;
+      font-size: 1.1rem;
+      padding: 12px 28px;
+      border: 3px solid #111;
+      box-shadow: 3px 3px 0 #111;
+    }
+    #btn-spin:disabled {
+      background: #888;
+      color: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Bet +/- buttons */
+    .bet-btn {
+      background: #fff;
+      color: #111;
+      font-size: 1.1rem;
+      width: 38px;
+      height: 38px;
+      border: 3px solid #111;
+      box-shadow: 2px 2px 0 #111;
+    }
+
+    /* TOP-UP button — green */
+    #btn-topup {
+      background: #2ecc71;
+      color: #fff;
+      font-size: .85rem;
+      padding: 10px 16px;
+      border: 3px solid #111;
+      box-shadow: 3px 3px 0 #111;
+    }
+
+    /* =========================================================
+       LEVER ASSEMBLY
+       Positioned on the right edge of the cabinet.
+       The lever handle is draggable; its vertical travel triggers
+       a spin when pulled far enough.
+       ========================================================= */
+    #lever-track {
+      position: absolute;
+      right: -36px;                 /* hangs off the right side */
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 220px;
+      background: #333;
+      border-radius: 14px;
+      border: 3px solid #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 6px;
+    }
+
+    /* The ball handle at the top of the lever arm */
+    #lever-ball {
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle at 35% 35%, #ff6b6b, #c0392b);
+      border-radius: 50%;
+      border: 3px solid #111;
+      cursor: grab;
+      position: absolute;
+      top: 4px;                     /* JS moves this between 4px and 164px */
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 2px 3px 6px rgba(0,0,0,.5);
+      z-index: 20;
+      transition: top 0s;           /* override when snapping back */
+    }
+    #lever-ball.snapping { transition: top .4s cubic-bezier(.22,1,.36,1); }
+
+    /* Vertical rod connecting ball to notch */
+    #lever-rod {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      background: #888;
+      border-radius: 4px;
+      top: 44px;                    /* just below the ball */
+      height: 40px;                 /* JS adjusts this height dynamically */
+      transition: height 0s;
+    }
+    #lever-rod.snapping { transition: height .4s cubic-bezier(.22,1,.36,1); }
+
+    /* Pull-label beneath the track */
+    #lever-label {
+      position: absolute;
+      bottom: -22px;
+      font-size: .6rem;
+      color: #aaa;
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       PAYTABLE — small legend at the bottom
+       ========================================================= */
+    #paytable {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .pay-row {
+      color: #ccc;
+      font-size: .7rem;
+      letter-spacing: 1px;
+    }
+    .pay-row span { color: #ffe135; font-weight: 700; }
+
+    /* =========================================================
+       SPACEBAR HINT
+       ========================================================= */
+    #hint {
+      color: #666;
+      font-size: .65rem;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     CABINET WRAPPER
+     Everything sits inside this dark housing.  The lever is
+     absolutely positioned as a child so it extends to the right.
+============================================================ -->
+<div id="cabinet">
+
+  <!-- Title -->
+  <div id="title">LUCKY 7s</div>
+
+  <!-- Credits & current bet display -->
+  <div id="info-bar">
+    <div class="info-box">
+      <div class="info-label">Credits</div>
+      <div class="info-value" id="display-credits">100</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">Bet</div>
+      <div class="info-value" id="display-bet">5</div>
+    </div>
+    <div class="info-box">
+      <div class="info-label">Last Win</div>
+      <div class="info-value" id="display-win">0</div>
+    </div>
+  </div>
+
+  <!-- Reel window with pay-line overlay -->
+  <div id="slot-window">
+    <!-- Win-line highlight band across the middle row -->
+    <div id="win-line"></div>
+
+    <!-- Three reel columns; strips are populated by JS -->
+    <div class="reel-col" id="reel-0"><div class="reel-strip" id="strip-0"></div></div>
+    <div class="reel-col" id="reel-1"><div class="reel-strip" id="strip-1"></div></div>
+    <div class="reel-col" id="reel-2"><div class="reel-strip" id="strip-2"></div></div>
+  </div>
+
+  <!-- Win / status message -->
+  <div id="message">PULL THE LEVER OR PRESS SPACE</div>
+
+  <!-- Bet controls + spin + top-up -->
+  <div id="controls">
+    <button class="bet-btn" id="btn-bet-down">−</button>
+    <span style="color:#ccc;font-size:.8rem;letter-spacing:2px;">BET</span>
+    <button class="bet-btn" id="btn-bet-up">+</button>
+    <button id="btn-spin">SPIN</button>
+    <button id="btn-topup">TOP UP +50</button>
+  </div>
+
+  <!-- Spacebar reminder -->
+  <div id="hint">SPACEBAR TO SPIN</div>
+
+  <!-- Paytable legend -->
+  <div id="paytable">
+    <div class="pay-row">🍒🍒🍒 → <span>×2</span></div>
+    <div class="pay-row">🍋🍋🍋 → <span>×3</span></div>
+    <div class="pay-row">🔔🔔🔔 → <span>×5</span></div>
+    <div class="pay-row">⭐⭐⭐ → <span>×8</span></div>
+    <div class="pay-row">💎💎💎 → <span>×15</span></div>
+    <div class="pay-row">7️⃣7️⃣7️⃣ → <span>×25</span></div>
+    <div class="pay-row">Any two → <span>×1</span></div>
+  </div>
+
+  <!-- Lever mounted on the right wall of the cabinet -->
+  <div id="lever-track">
+    <div id="lever-ball"></div>
+    <div id="lever-rod"></div>
+    <div id="lever-label">PULL</div>
+  </div>
+
+</div><!-- /cabinet -->
+
+<script>
+/* =============================================================
+   SLOT MACHINE — main game script
+   Architecture overview:
+     1. Constants & symbol definitions
+     2. Reel state & strip building
+     3. Spin animation loop (requestAnimationFrame)
+     4. Win evaluation
+     5. UI helpers (credit/bet display)
+     6. Input handlers (button, keyboard, lever drag)
+============================================================= */
+
+/* ─── 1. CONSTANTS ─────────────────────────────────────────── */
+
+/**
+ * SYMBOLS — array of all possible reel symbols.
+ * Each entry carries:
+ *   emoji   : the visible glyph
+ *   weight  : relative probability on the reel strip
+ *   payout  : multiplier when three of a kind land on the mid-row
+ */
+const SYMBOLS = [
+  { emoji: '🍒', weight: 6, payout: 2  },
+  { emoji: '🍋', weight: 5, payout: 3  },
+  { emoji: '🔔', weight: 4, payout: 5  },
+  { emoji: '⭐', weight: 3, payout: 8  },
+  { emoji: '💎', weight: 2, payout: 15 },
+  { emoji: '7️⃣', weight: 1, payout: 25 },
+];
+
+/** How many virtual symbols make up one reel strip (before duplication) */
+const STRIP_LENGTH = 24;
+
+/**
+ * CELL_HEIGHT — pixel height of one symbol cell, must match CSS .symbol-cell height.
+ * The window shows exactly 3 rows (top, middle, bottom).
+ */
+const CELL_HEIGHT = 70;
+
+/** Number of visible rows in the slot window */
+const VISIBLE_ROWS = 3;
+
+/**
+ * Spin-speed constants (in pixels per frame at 60 fps).
+ * FULL_SPEED: maximum scroll rate when reel is at full speed.
+ * MIN_SPEED : below this px/frame the reel is considered stopped.
+ * DECEL     : fraction by which speed is multiplied each frame while braking.
+ *             Smaller = more gradual slowdown = longer, more theatrical stop.
+ */
+const FULL_SPEED = 28;
+const MIN_SPEED  = 0.5;
+const DECEL      = 0.96;     /* 4 % speed reduction per frame */
+
+/** Stagger delay (ms) before each subsequent reel starts braking */
+const REEL_STOP_DELAY = [0, 400, 800];
+
+/* ─── 2. GAME STATE ─────────────────────────────────────────── */
+
+let credits  = 100;   /* player's current credit balance */
+let bet      = 5;     /* amount wagered per spin */
+let spinning = false; /* true while any reel is still moving */
+
+/* ─── 3. REEL STRIP CONSTRUCTION ───────────────────────────── */
+
+/**
+ * buildWeightedStrip(length)
+ * Returns an array of symbol indices where each symbol appears
+ * proportional to its weight.  This mirrors a physical reel strip
+ * where higher-value symbols appear fewer times.
+ */
+function buildWeightedStrip(length) {
+  /* Expand each symbol into the pool according to its weight */
+  const pool = [];
+  SYMBOLS.forEach((sym, idx) => {
+    for (let i = 0; i < sym.weight; i++) pool.push(idx);
+  });
+
+  /* Shuffle the pool with Fisher-Yates */
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  /* Sample `length` entries from the shuffled pool (with wrap) */
+  return Array.from({ length }, (_, i) => pool[i % pool.length]);
+}
+
+/**
+ * reelData[r] holds all runtime state for reel r (0-2):
+ *   strip       : array of symbol indices (the physical reel strip)
+ *   stripEl     : reference to the DOM .reel-strip div
+ *   cells       : array of .symbol-cell div references
+ *   offset      : current vertical scroll position in pixels
+ *   speed       : current scroll speed in px/frame
+ *   braking     : whether this reel is in the deceleration phase
+ *   stopped     : true once the reel has snapped to its final position
+ *   targetIndex : which symbol index should land on the middle row
+ */
+const reelData = [null, null, null].map((_, r) => ({
+  strip:       buildWeightedStrip(STRIP_LENGTH),
+  stripEl:     null,   /* filled after DOM queries below */
+  cells:       [],
+  offset:      0,
+  speed:       0,
+  braking:     false,
+  stopped:     true,
+  targetIndex: 0,
+}));
+
+/**
+ * populateStrip(r)
+ * Fills the DOM strip for reel r with symbol cells.
+ * We render the strip twice (seamless loop: strip + strip) so the
+ * CSS transform can wrap around without a visual gap.
+ */
+function populateStrip(r) {
+  const data = reelData[r];
+  const stripEl = document.getElementById(`strip-${r}`);
+  data.stripEl = stripEl;
+  data.cells = [];
+
+  /* Clear any existing children */
+  stripEl.innerHTML = '';
+
+  /* Build two copies for seamless looping */
+  for (let copy = 0; copy < 2; copy++) {
+    data.strip.forEach((symIdx, pos) => {
+      const cell = document.createElement('div');
+      cell.className = 'symbol-cell';
+      cell.textContent = SYMBOLS[symIdx].emoji;
+      /* Store which symbol index this cell holds so we can read it later */
+      cell.dataset.symIdx = symIdx;
+      stripEl.appendChild(cell);
+      if (copy === 0) data.cells.push(cell); /* only track first copy */
+    });
+  }
+
+  /* Start with a random initial offset so reels look different */
+  data.offset = Math.random() * STRIP_LENGTH * CELL_HEIGHT;
+  applyOffset(r);
+}
+
+/** Applies the current offset to the strip's CSS transform */
+function applyOffset(r) {
+  const data = reelData[r];
+  const totalHeight = data.strip.length * CELL_HEIGHT;
+
+  /* Wrap offset into [0, totalHeight) so the strip loops cleanly */
+  data.offset = ((data.offset % totalHeight) + totalHeight) % totalHeight;
+
+  /*
+   * The strip div contains two copies of the symbols (totalHeight × 2).
+   * We translate upward (negative Y) to scroll the strip down visually,
+   * but we need the middle visible cell to sit in the viewport centre.
+   * The reel window clips to VISIBLE_ROWS * CELL_HEIGHT = 210px.
+   */
+  data.stripEl.style.transform = `translateY(-${data.offset}px)`;
+}
+
+/* ─── 4. SPIN ANIMATION ─────────────────────────────────────── */
+
+/**
+ * spinResults[r] — the symbol index that should land on the mid-row
+ * for each reel.  Computed before the animation begins.
+ */
+let spinResults = [0, 0, 0];
+
+/**
+ * startSpin()
+ * Kicks off a new spin:
+ *   1. Deduct the bet.
+ *   2. Pre-compute the outcome (where each reel must stop).
+ *   3. Set each reel to FULL_SPEED and mark as not stopped.
+ *   4. Schedule braking for each reel after REEL_STOP_DELAY[r].
+ */
+function startSpin() {
+  if (spinning || credits < bet) return;
+
+  /* Deduct bet immediately */
+  credits -= bet;
+  spinning = true;
+  updateDisplay();
+  document.getElementById('message').textContent = '';
+  document.getElementById('btn-spin').disabled = true;
+
+  /* Pre-determine outcome for each reel */
+  spinResults = reelData.map(data => {
+    return Math.floor(Math.random() * data.strip.length);
+  });
+
+  /* Optionally force a win ~10 % of the time for demonstration */
+  /* (remove this block for a purely random machine) */
+  if (Math.random() < 0.10) {
+    const winSymIdx = Math.floor(Math.random() * SYMBOLS.length);
+    /* Find a strip position for that symbol on each reel */
+    spinResults = reelData.map(data => {
+      const idx = data.strip.findIndex(s => s === winSymIdx);
+      return idx >= 0 ? idx : Math.floor(Math.random() * data.strip.length);
+    });
+  }
+
+  /* Spin all reels up to full speed */
+  reelData.forEach((data, r) => {
+    data.speed   = FULL_SPEED;
+    data.braking = false;
+    data.stopped = false;
+    data.targetIndex = spinResults[r];
+
+    /* After REEL_STOP_DELAY[r] ms, begin braking this reel */
+    setTimeout(() => {
+      data.braking = true;
+    }, 600 + REEL_STOP_DELAY[r]);   /* 600 ms spin-up grace period */
+  });
+
+  /* Begin the animation loop */
+  requestAnimationFrame(animateFrame);
+}
+
+/**
+ * animateFrame()
+ * Called every frame while any reel is moving.
+ * For each reel:
+ *   - If not braking: advance offset at full speed.
+ *   - If braking:     reduce speed by DECEL each frame.
+ *                     When slow enough, snap to the target position.
+ */
+function animateFrame() {
+  let anyMoving = false;
+
+  reelData.forEach((data, r) => {
+    if (data.stopped) return;
+
+    if (!data.braking) {
+      /* Full-speed scroll — just advance the offset */
+      data.offset += data.speed;
+      applyOffset(r);
+      anyMoving = true;
+    } else {
+      /* Deceleration phase */
+      data.speed *= DECEL;
+
+      if (data.speed < MIN_SPEED) {
+        /* Reel is slow enough — snap to the exact target position */
+        snapToTarget(r);
+        /* Mark stopped so this reel is skipped in future frames */
+        data.stopped = true;
+      } else {
+        data.offset += data.speed;
+        applyOffset(r);
+        anyMoving = true;
+      }
+    }
+  });
+
+  if (anyMoving) {
+    requestAnimationFrame(animateFrame);
+  } else {
+    /* All reels stopped — evaluate the result */
+    onAllReelsStopped();
+  }
+}
+
+/**
+ * snapToTarget(r)
+ * Calculates the exact offset so that spinResults[r] lands on the
+ * middle visible row, then applies it without animation.
+ *
+ * Middle row is the second of three visible rows.
+ * Visible window height = VISIBLE_ROWS * CELL_HEIGHT = 210px.
+ * Middle row top edge   = 1 * CELL_HEIGHT = 70px.
+ *
+ * We want the target cell's top edge to be at 70px inside the window,
+ * i.e.  offset = targetIndex * CELL_HEIGHT - CELL_HEIGHT
+ *              = (targetIndex - 1) * CELL_HEIGHT
+ * (The -1 accounts for the one row above the middle.)
+ */
+function snapToTarget(r) {
+  const data = reelData[r];
+  const totalHeight = data.strip.length * CELL_HEIGHT;
+
+  /* Desired offset: target symbol sits at the middle row */
+  let target = (data.targetIndex) * CELL_HEIGHT - CELL_HEIGHT;
+
+  /* Keep within [0, totalHeight) */
+  target = ((target % totalHeight) + totalHeight) % totalHeight;
+
+  data.offset = target;
+  applyOffset(r);
+
+  /* Update cell emojis to reflect the final strip symbol at target */
+  updateVisibleCells(r);
+}
+
+/**
+ * updateVisibleCells(r)
+ * After snapping, rebuild the text content of the three visible cells
+ * so any future DOM reads are correct.  (The strip itself is unchanged;
+ * this just ensures the cells array reflects what's visible.)
+ */
+function updateVisibleCells(r) {
+  const data = reelData[r];
+  const len = data.strip.length;
+
+  /* targetIndex is the middle row; one above and one below */
+  for (let row = 0; row < VISIBLE_ROWS; row++) {
+    const stripPos = ((data.targetIndex - 1 + row) % len + len) % len;
+    if (data.cells[stripPos]) {
+      /* cell is already correct — no DOM write needed */
+    }
+  }
+}
+
+/* ─── 5. WIN EVALUATION ─────────────────────────────────────── */
+
+/**
+ * onAllReelsStopped()
+ * Reads the middle-row symbol from each reel, checks for winning
+ * combinations, awards credits, and updates the display.
+ *
+ * Win logic:
+ *   Three of a kind → full payout multiplier × bet
+ *   Two of a kind   → 1× bet (break even)
+ *   No match        → nothing (bet already deducted)
+ */
+function onAllReelsStopped() {
+  spinning = false;
+  document.getElementById('btn-spin').disabled = false;
+
+  /* Read which symbol index sits at the middle row for each reel */
+  const midSymbols = reelData.map(data => {
+    return data.strip[data.targetIndex];
+  });
+
+  /* Count occurrences of each symbol on the middle row */
+  const [s0, s1, s2] = midSymbols;
+
+  let winAmount = 0;
+  let msgText   = '';
+  let winCells  = [];   /* indices (0-2) of reels with winning symbol */
+
+  if (s0 === s1 && s1 === s2) {
+    /* Three of a kind */
+    const sym = SYMBOLS[s0];
+    winAmount = bet * sym.payout;
+    msgText   = `★ ${sym.emoji}${sym.emoji}${sym.emoji}  WIN  +${winAmount} ★`;
+    winCells  = [0, 1, 2];
+  } else if (s0 === s1 || s1 === s2 || s0 === s2) {
+    /* Two of a kind — return bet (1× multiplier) */
+    winAmount = bet * 1;
+    msgText   = `PAIR! +${winAmount}`;
+    /* Which reels matched? */
+    if (s0 === s1) winCells = [0, 1];
+    else if (s1 === s2) winCells = [1, 2];
+    else winCells = [0, 2];
+  } else {
+    msgText = credits > 0 ? 'NO WIN — TRY AGAIN' : 'OUT OF CREDITS!';
+  }
+
+  credits += winAmount;
+
+  /* Flash the winning cells */
+  winCells.forEach(r => {
+    /* The middle-row cell is at strip position targetIndex,
+       but in the DOM it's the cell at index targetIndex within cells[] */
+    const data = reelData[r];
+    const cellIdx = data.targetIndex;
+    const cell = data.cells[cellIdx];
+    if (cell) {
+      cell.classList.remove('winning'); /* reset before re-adding */
+      void cell.offsetWidth;            /* force reflow to restart animation */
+      cell.classList.add('winning');
+    }
+  });
+
+  document.getElementById('display-win').textContent = winAmount;
+  document.getElementById('message').textContent      = msgText;
+  updateDisplay();
+
+  /* Auto top-up hint when credits run out */
+  if (credits <= 0) {
+    credits = 0;
+    document.getElementById('message').textContent = 'NO CREDITS — TOP UP!';
+  }
+}
+
+/* ─── 6. UI HELPERS ─────────────────────────────────────────── */
+
+/** Refreshes the credits and bet displays in the info bar */
+function updateDisplay() {
+  document.getElementById('display-credits').textContent = credits;
+  document.getElementById('display-bet').textContent     = bet;
+}
+
+/* ─── 7. BUTTON & KEYBOARD HANDLERS ────────────────────────── */
+
+/* SPIN button */
+document.getElementById('btn-spin').addEventListener('click', startSpin);
+
+/* BET DOWN — minimum bet is 1 */
+document.getElementById('btn-bet-down').addEventListener('click', () => {
+  if (spinning) return;
+  if (bet > 1) { bet--; updateDisplay(); }
+});
+
+/* BET UP — maximum bet is 50 (or available credits) */
+document.getElementById('btn-bet-up').addEventListener('click', () => {
+  if (spinning) return;
+  if (bet < Math.min(50, credits)) { bet++; updateDisplay(); }
+});
+
+/* TOP-UP — adds 50 credits */
+document.getElementById('btn-topup').addEventListener('click', () => {
+  credits += 50;
+  updateDisplay();
+  document.getElementById('message').textContent = '+50 CREDITS ADDED';
+});
+
+/**
+ * Spacebar handler.
+ * The spacebar is the keyboard equivalent of pressing SPIN.
+ * We prevent default to stop the page from scrolling.
+ */
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    startSpin();
+  }
+});
+
+/* ─── 8. LEVER DRAG LOGIC ───────────────────────────────────── */
+
+/*
+ * The lever works like a physical slot machine lever:
+ *   - Player grabs the red ball handle at the top.
+ *   - Dragging it DOWN pulls the lever.
+ *   - When pulled past the TRIGGER_Y threshold, a spin fires.
+ *   - The handle snaps back to the top position after release.
+ *
+ * All positions are relative to the #lever-track element.
+ *
+ * DOM reference layout:
+ *   track top (0px) → ball rests at top: 4px
+ *   track height: 220px, ball diameter: 40px
+ *   max ball travel: 220 - 40 - 4 - 6 = 170px  (some padding at bottom)
+ */
+const LEVER_TOP_REST  = 4;    /* px — ball resting position (top of track) */
+const LEVER_MAX_PULL  = 164;  /* px — maximum ball top value (fully pulled) */
+const LEVER_TRIGGER   = 110;  /* px — top value at which spin fires */
+
+const ball  = document.getElementById('lever-ball');
+const rod   = document.getElementById('lever-rod');
+const track = document.getElementById('lever-track');
+
+let leverDragging  = false;
+let leverStartY    = 0;   /* clientY when drag began */
+let leverStartTop  = LEVER_TOP_REST;  /* ball top px when drag began */
+let leverTriggered = false;  /* prevents double-triggering in one pull */
+
+/**
+ * setLeverPos(top)
+ * Moves the ball to `top` px and adjusts the rod height so it always
+ * appears to connect the ball to a fixed anchor at the bottom of the
+ * first 44px of the track (beneath the ball's rest).
+ */
+function setLeverPos(topPx) {
+  const clamped = Math.max(LEVER_TOP_REST, Math.min(LEVER_MAX_PULL, topPx));
+  ball.style.top = clamped + 'px';
+  /* Rod grows downward from just below the ball */
+  const rodHeight = Math.max(0, clamped - LEVER_TOP_REST);
+  rod.style.height = rodHeight + 'px';
+  rod.style.top    = (LEVER_TOP_REST + 40) + 'px';  /* ball bottom edge */
+}
+
+/** Animate the lever snapping back to the resting position */
+function snapLeverBack() {
+  ball.classList.add('snapping');
+  rod.classList.add('snapping');
+  setLeverPos(LEVER_TOP_REST);
+  /* Remove transition class after animation completes */
+  setTimeout(() => {
+    ball.classList.remove('snapping');
+    rod.classList.remove('snapping');
+  }, 420);
+}
+
+/* Pointer down — begin drag */
+ball.addEventListener('pointerdown', (e) => {
+  if (spinning) return;          /* can't pull while reels spin */
+  leverDragging  = true;
+  leverTriggered = false;
+  leverStartY    = e.clientY;
+  leverStartTop  = LEVER_TOP_REST;
+  ball.setPointerCapture(e.pointerId);   /* keep events even outside element */
+  e.preventDefault();
+});
+
+/* Pointer move — update lever position */
+ball.addEventListener('pointermove', (e) => {
+  if (!leverDragging) return;
+
+  const delta = e.clientY - leverStartY;   /* how far user moved pointer */
+  const newTop = leverStartTop + delta;
+  setLeverPos(newTop);
+
+  /* If pulled past trigger threshold and not yet triggered this pull */
+  if (newTop >= LEVER_TRIGGER && !leverTriggered) {
+    leverTriggered = true;
+    startSpin();                 /* fire the spin */
+    snapLeverBack();             /* snap back immediately */
+    leverDragging = false;
+    ball.releasePointerCapture(e.pointerId);
+  }
+});
+
+/* Pointer up — release without triggering */
+ball.addEventListener('pointerup', (e) => {
+  if (!leverDragging) return;
+  leverDragging = false;
+  snapLeverBack();
+});
+
+/* Also handle pointercancel (e.g., touch interrupted) */
+ball.addEventListener('pointercancel', () => {
+  leverDragging = false;
+  snapLeverBack();
+});
+
+/* ─── 9. INITIALISATION ─────────────────────────────────────── */
+
+/**
+ * init()
+ * Build all three reel strips and show the initial state.
+ * Called once when the page loads.
+ */
+function init() {
+  /* Build the DOM strips for all three reels */
+  for (let r = 0; r < 3; r++) {
+    populateStrip(r);
+  }
+  updateDisplay();
+}
+
+/* Kick everything off */
+init();
+
+</script>
+</body>
+</html>

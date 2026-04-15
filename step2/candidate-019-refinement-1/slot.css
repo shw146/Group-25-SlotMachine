@@ -1,0 +1,833 @@
+/* ═══════════════════════════════════════════════════
+   slot.css  —  AI Token Slots™  stylesheet
+   Sections:
+     1.  Reset & box-model
+     2.  Theme variables (4 high-contrast palettes)
+     3.  Body & page background
+     4.  Outer wrapper layout
+     5.  Machine cabinet shell
+     6.  Title / neon sign
+     7.  Top bar (ticker + theme button)
+     8.  Stats bar
+     9.  Reels section (payline pips + reel columns)
+    10.  Controls (bet buttons + spin button)
+    11.  Message / result area
+    12.  Spin history log (collapsible)
+    13.  Payout reference table
+    14.  Lever assembly
+    15.  Floating coin / particle animations
+    16.  Machine state animations (win / jackpot / loss)
+    17.  Responsive overrides (mobile ≤ 540 px)
+═══════════════════════════════════════════════════ */
+
+
+/* ── 1. RESET ──────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ── 2. THEME VARIABLES ────────────────────────────
+   Each body.theme-* class overrides the color set.
+   All colors are high-contrast: vivid neon on near-black.
+─────────────────────────────────────────────────── */
+
+/* Theme 1 — Neon Green (default) */
+body.theme-neon {
+  --p:      #00ff88;            /* primary: neon green for borders/text/glow */
+  --a:      #00ccff;            /* accent: cyan for info messages */
+  --gold:   #ffd700;            /* gold for wallet amounts and wins */
+  --red:    #ff4455;            /* red for losses and burn counter */
+  --bg:     #07070f;            /* page background */
+  --panel:  #0d0d1c;            /* cabinet interior fill */
+  --bord:   rgba(0,255,136,.22);/* border/separator tint */
+  --hi:     rgba(0,255,136,.07);/* center-row reel highlight fill */
+  --fade:   13,13,28;           /* panel color as R,G,B for gradient fade */
+}
+
+/* Theme 2 — Gold / Amber */
+body.theme-gold {
+  --p:      #ffd700;
+  --a:      #ff9900;
+  --gold:   #ffee66;
+  --red:    #ff4444;
+  --bg:     #0a0800;
+  --panel:  #181000;
+  --bord:   rgba(255,215,0,.22);
+  --hi:     rgba(255,215,0,.08);
+  --fade:   24,16,0;
+}
+
+/* Theme 3 — Cyber (cyan + magenta) */
+body.theme-cyber {
+  --p:      #00ffff;
+  --a:      #ff00ff;
+  --gold:   #ffff00;
+  --red:    #ff2266;
+  --bg:     #050010;
+  --panel:  #0d0028;
+  --bord:   rgba(0,255,255,.22);
+  --hi:     rgba(0,255,255,.08);
+  --fade:   13,0,40;
+}
+
+/* Theme 4 — Retro Orange */
+body.theme-retro {
+  --p:      #ff6600;
+  --a:      #ffcc00;
+  --gold:   #ffe44d;
+  --red:    #ff2222;
+  --bg:     #0a0500;
+  --panel:  #180800;
+  --bord:   rgba(255,102,0,.22);
+  --hi:     rgba(255,102,0,.08);
+  --fade:   24,8,0;
+}
+
+/* Symbol cell height — JS constant SYM_H must equal this value (110) */
+:root { --sh: 110px; }
+
+
+/* ── 3. BODY & PAGE BACKGROUND ─────────────────── */
+body {
+  background: var(--bg);
+  color: var(--p);
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  overflow-x: hidden;
+  transition: background .4s, color .4s;
+}
+
+/* Subtle dot-grid behind everything */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ── 4. OUTER WRAPPER ──────────────────────────── */
+/* Machine cabinet + lever sit side-by-side */
+.machine-wrapper {
+  display: flex;
+  align-items: stretch;   /* lever matches cabinet height */
+  width: 100%;
+  max-width: 620px;
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ── 5. MACHINE CABINET SHELL ─────────────────── */
+.machine {
+  position: relative;
+  background: var(--panel);
+  border: 2px solid var(--p);
+  border-right: none;          /* seamless join with lever housing */
+  border-radius: 18px 0 0 18px;
+  padding: 22px 22px 18px;
+  flex: 1;
+  box-shadow:
+    0 0 50px rgba(0,0,0,.7),
+    0 0 80px rgba(0,0,0,.4);
+  transition: border-color .4s, box-shadow .4s;
+}
+
+/* Retro CRT scanlines overlay */
+.machine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px 0 0 18px;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,.05) 3px,
+    rgba(0,0,0,.05) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+
+/* ── 6. TITLE / NEON SIGN ─────────────────────── */
+.title {
+  text-align: center;
+  margin-bottom: 12px;
+}
+.title h1 {
+  font-size: clamp(1.25rem, 5vw, 1.85rem);
+  letter-spacing: 4px;
+  /* layered glow creates a neon tube look */
+  text-shadow:
+    0 0 10px var(--p),
+    0 0 30px var(--p),
+    0 0 60px rgba(255,255,255,.1);
+}
+.subtitle {
+  font-size: .57rem;
+  opacity: .38;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+
+/* ── 7. TOP BAR ────────────────────────────────── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Scrolling AI status line */
+.ticker {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--bord);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: .58rem;
+  opacity: .6;
+  letter-spacing: 1px;
+}
+.ticker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--p);
+  flex-shrink: 0;
+  animation: blink 1s step-end infinite;
+}
+.ticker-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Small theme-cycle button */
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--bord);
+  color: var(--p);
+  font-family: 'Courier New', monospace;
+  font-size: .58rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  opacity: .65;
+  transition: opacity .15s, border-color .15s;
+}
+.theme-btn:hover {
+  opacity: 1;
+  border-color: var(--p);
+}
+
+
+/* ── 8. STATS BAR ─────────────────────────────── */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.stat {
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--bord);
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+}
+.stat-label {
+  font-size: .53rem;
+  opacity: .42;
+  letter-spacing: 1.5px;
+}
+.stat-value {
+  font-size: .95rem;
+  font-weight: bold;
+}
+/* Colored stat values */
+.stat-value.gold { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+.stat-value.red  { color: var(--red); }
+.stat-value.cyan { color: var(--a); }
+
+
+/* ── 9. REELS SECTION ─────────────────────────────
+   Layout: [payline pips] [three reel columns] [payline pips]
+   Each reel column shows 3 symbol rows simultaneously.
+   Only the center row is the active payline.
+─────────────────────────────────────────────────── */
+.reels-section {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+/* Payline marker column on either side */
+.payline-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  /* match total height: reels-wrap padding (16+16) + 3 rows */
+  padding: 16px 0;
+  width: 18px;
+  flex-shrink: 0;
+  /* stretch to match .reels-wrap height */
+  align-self: stretch;
+}
+.payline-pip {
+  font-size: .7rem;
+  opacity: .18;
+  color: var(--p);
+  line-height: 1;
+}
+/* The active (center) payline pip glows gold */
+.payline-pip.active {
+  opacity: 1;
+  color: var(--gold);
+  text-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold);
+  animation: pipPulse 2s ease-in-out infinite;
+}
+
+/* Container for the three reel columns */
+.reels-wrap {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  background: rgba(0,0,0,.5);
+  border: 1px solid var(--bord);
+  border-radius: 10px;
+  padding: 16px 10px;
+  justify-content: center;
+}
+
+/* One reel column — clips the scrolling strip to exactly 3 rows */
+.reel-outer {
+  flex: 1;
+  max-width: 125px;
+  height: calc(var(--sh) * 3);  /* exactly three symbol rows visible */
+  overflow: hidden;
+  border-radius: 7px;
+  border: 2px solid var(--bord);
+  background: #000;
+  position: relative;
+}
+
+/* Highlight band on the center (active payline) row */
+.reel-outer::before {
+  content: '';
+  position: absolute;
+  top: var(--sh);     /* offset by one row height */
+  left: 0;
+  right: 0;
+  height: var(--sh);
+  background: var(--hi);
+  border-top: 1px solid rgba(255,255,255,.15);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Top/bottom fade masks blend the strip edges into the cabinet */
+.reel-outer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--fade), .88) 0%,
+    transparent            25%,
+    transparent            75%,
+    rgba(var(--fade), .88) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* The long vertical strip of emoji cells that scrolls */
+.reel-strip {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;   /* hint browser to GPU-composite this layer */
+}
+
+/* Individual symbol cell — sized to match --sh */
+.sym-cell {
+  width: 100%;
+  height: var(--sh);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+
+/* ── 10. CONTROLS ─────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* Bet amount display */
+.bet-box {
+  text-align: center;
+  padding: 7px 12px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid var(--bord);
+  border-radius: 6px;
+  min-width: 86px;
+}
+.bet-box .bl { font-size: .53rem; opacity: .42; letter-spacing: 2px; }
+.bet-box .bv { font-size: 1rem; color: var(--gold); }
+
+/* Base style applied to every <button> in the machine */
+button {
+  background: transparent;
+  border: 2px solid var(--p);
+  color: var(--p);
+  font-family: 'Courier New', monospace;
+  font-size: .78rem;
+  padding: 8px 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 1.5px;
+  transition: background .12s, box-shadow .12s, border-color .4s, color .4s;
+  white-space: nowrap;
+}
+button:hover:not(:disabled) {
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 0 14px rgba(255,255,255,.15);
+}
+button:active:not(:disabled) {
+  transform: scale(.96);
+}
+button:disabled {
+  opacity: .28;
+  cursor: not-allowed;
+}
+
+/* Spin button is larger and prominently glowing */
+#spinBtn {
+  font-size: 1rem;
+  padding: 11px 26px;
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--p);
+  box-shadow: 0 0 18px rgba(255,255,255,.08);
+}
+
+
+/* ── 11. MESSAGE / RESULT AREA ────────────────── */
+.msg-area {
+  min-height: 58px;
+  padding: 10px 13px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid var(--bord);
+  border-radius: 8px;
+  margin-bottom: 11px;
+  font-size: .78rem;
+  line-height: 1.7;
+  color: var(--a);
+  transition: color .2s;
+}
+.msg-area.win  { color: var(--gold); }
+.msg-area.loss { color: var(--red);  }
+
+
+/* ── 12. SPIN HISTORY LOG ─────────────────────────
+   Collapsible panel. Clicking the header
+   toggles max-height for a smooth slide.
+─────────────────────────────────────────────────── */
+.history-section {
+  border: 1px solid var(--bord);
+  border-radius: 8px;
+  margin-bottom: 11px;
+  overflow: hidden;
+}
+
+/* Clickable header row (styled as a button but looks like a bar) */
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 12px;
+  background: rgba(0,0,0,.3);
+  /* reset button defaults for this element */
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--p);
+  font-size: .6rem;
+  letter-spacing: 2px;
+  opacity: .55;
+  cursor: pointer;
+  text-align: left;
+}
+.history-header:hover {
+  opacity: 1;
+  background: rgba(0,0,0,.45);
+  box-shadow: none;
+}
+.history-title-text { flex: 1; }
+.history-count { color: var(--a); }
+/* Arrow rotates when open */
+.history-arrow { transition: transform .2s; }
+.history-arrow.open { transform: rotate(180deg); }
+
+/* Entry list — collapsed by default, opens to max-height */
+.history-list {
+  max-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: max-height .3s ease;
+  background: rgba(0,0,0,.18);
+}
+.history-list.open { max-height: 210px; }
+
+/* Placeholder shown before any spins */
+.history-empty {
+  padding: 10px 14px;
+  font-size: .62rem;
+  opacity: .3;
+  text-align: center;
+}
+
+/* One row per completed spin */
+.history-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 13px;
+  font-size: .63rem;
+  border-top: 1px solid rgba(255,255,255,.04);
+  animation: slideIn .18s ease-out;
+}
+.history-entry:first-child { border-top: none; }
+.history-num  { opacity: .38; width: 28px; flex-shrink: 0; }
+.history-syms { flex: 1; letter-spacing: 3px; font-size: .88rem; }
+.history-result { white-space: nowrap; }
+/* Color-code the outcome text */
+.history-result.win-result  { color: var(--gold); }
+.history-result.loss-result { color: var(--red); }
+.history-result.pair-result { color: var(--a); }
+
+
+/* ── 13. PAYOUT TABLE ─────────────────────────── */
+.payouts {
+  border-top: 1px solid var(--bord);
+  padding-top: 11px;
+}
+.pay-title {
+  font-size: .55rem;
+  letter-spacing: 2.5px;
+  opacity: .28;
+  text-align: center;
+  margin-bottom: 7px;
+}
+.pay-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+  font-size: .63rem;
+  opacity: .48;
+}
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 8px;
+  background: rgba(0,0,0,.25);
+  border-radius: 4px;
+}
+
+
+/* ── 14. LEVER ASSEMBLY ───────────────────────────
+   Right panel attached to the machine.
+   Contains a pivoting arm with a red glowing knob.
+   JS adds/removes .pulled and .springing classes
+   to animate the pull-and-release motion.
+─────────────────────────────────────────────────── */
+.lever-housing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 10px 18px;
+  background: var(--panel);
+  border: 2px solid var(--p);
+  border-left: none;            /* merges with machine's right edge */
+  border-radius: 0 18px 18px 0;
+  width: 60px;
+  cursor: pointer;
+  gap: 6px;
+  transition: background .4s, border-color .4s;
+  position: relative;
+  /* soft glow bleeds to the right */
+  box-shadow: 6px 0 30px rgba(0,0,0,.5);
+}
+
+/* Highlight the knob on hover to invite interaction */
+.lever-housing:hover .lever-knob {
+  box-shadow:
+    0 0 22px rgba(220,0,0,.9),
+    0 0 44px rgba(220,0,0,.4),
+    inset 0 2px 5px rgba(255,255,255,.35);
+}
+
+.lever-housing:focus { outline: none; }
+.lever-housing:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+  border-radius: 0 18px 18px 0;
+}
+
+/* "PULL" written vertically above the arm */
+.lever-label {
+  font-size: .52rem;
+  letter-spacing: 3px;
+  opacity: .38;
+  color: var(--p);
+  /* rotate text 90° so it reads top-to-bottom */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+
+/* Track area the arm occupies */
+.lever-track {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ── Arm pivot mechanics ──
+   transform-origin is at the BOTTOM of the arm.
+   "Pulled" state rotates the top toward the machine (left = negative degrees). */
+.lever-arm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: bottom center;
+  transform: rotate(0deg);
+  transition: transform .15s ease-in;
+  cursor: pointer;
+}
+
+/* Down-stroke: arm swings toward machine */
+.lever-arm.pulled {
+  transform: rotate(-52deg);
+  transition: transform .13s ease-in;
+}
+
+/* Spring back: slight overshoot past vertical */
+.lever-arm.springing {
+  transform: rotate(7deg);
+  transition: transform .22s cubic-bezier(.36,.07,.19,.97);
+}
+
+/* Red glowing ball at the top */
+.lever-knob {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  /* radial gradient simulates a shiny sphere */
+  background: radial-gradient(circle at 35% 32%, #ff9999, #cc0000 55%, #880000);
+  box-shadow:
+    0 0 12px rgba(200,0,0,.65),
+    0 0 26px rgba(200,0,0,.3),
+    inset 0 2px 4px rgba(255,255,255,.3);
+  flex-shrink: 0;
+  transition: box-shadow .2s;
+}
+
+/* Metal shaft between knob and base */
+.lever-shaft {
+  width: 7px;
+  height: 110px;
+  /* brushed-metal gradient */
+  background: linear-gradient(
+    to right,
+    #444 0%, #999 35%, #ddd 50%, #999 65%, #444 100%
+  );
+  border-radius: 3px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.6);
+}
+
+/* Mounting plate at the bottom of the arm */
+.lever-base-plate {
+  width: 40px;
+  height: 14px;
+  background: linear-gradient(to bottom, #777, #ccc 40%, #777);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,.7);
+}
+
+/* Small chrome ring in the base plate */
+.lever-chrome-ring {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #eee, #777);
+  box-shadow: inset 0 2px 3px rgba(0,0,0,.6);
+}
+
+
+/* ── 15. FLOATING COIN PARTICLES ──────────────────
+   JS spawns .float-coin elements inside #particleLayer.
+   They animate upward (wins) or downward (losses).
+─────────────────────────────────────────────────── */
+
+/* Fixed overlay covering the full viewport */
+#particleLayer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.float-coin {
+  position: absolute;
+  font-size: 1.4rem;
+  pointer-events: none;
+  animation: floatUp 1.5s ease-out forwards;
+}
+
+/* Win: coin floats upward and fades */
+@keyframes floatUp {
+  0%   { opacity: 1;  transform: translateY(0)     scale(1)   rotate(0deg);  }
+  60%  { opacity: .85; }
+  100% { opacity: 0;  transform: translateY(-115px) scale(.35) rotate(28deg); }
+}
+
+/* Loss: money bag drops down and fades */
+.float-coin.loss { animation-name: floatDown; }
+@keyframes floatDown {
+  0%   { opacity: 1; transform: translateY(0)    scale(1)   rotate(0deg);   }
+  100% { opacity: 0; transform: translateY(90px) scale(.45) rotate(-22deg); }
+}
+
+/* Jackpot: coins explode outward in random directions
+   (--bx and --by are set inline by JS per particle) */
+.float-coin.burst { animation: burst 1.3s ease-out forwards; }
+@keyframes burst {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--bx), var(--by)) scale(.25); }
+}
+
+
+/* ── 16. MACHINE STATE ANIMATIONS ─────────────────
+   Classes are toggled by JS during outcome evaluation.
+─────────────────────────────────────────────────── */
+
+/* Win glow: machine border pulses gold */
+@keyframes winGlow {
+  0%,100% { box-shadow: 0 0 50px rgba(0,0,0,.7); }
+  50% {
+    box-shadow:
+      0 0 60px rgba(255,215,0,.55),
+      0 0 120px rgba(255,215,0,.2),
+      inset 0 0 30px rgba(255,215,0,.07);
+    border-color: var(--gold);
+  }
+}
+
+/* Jackpot rave: hue-rotate creates rainbow cycling */
+@keyframes jackpotRave {
+  0%   { filter: hue-rotate(0deg)   brightness(1.08); }
+  25%  { filter: hue-rotate(90deg)  brightness(1.18); }
+  50%  { filter: hue-rotate(180deg) brightness(1.08); }
+  75%  { filter: hue-rotate(270deg) brightness(1.18); }
+  100% { filter: hue-rotate(360deg) brightness(1.08); }
+}
+
+/* Loss shake: machine rocks left-right */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  15%     { transform: translateX(-9px); }
+  35%     { transform: translateX(9px); }
+  55%     { transform: translateX(-5px); }
+  75%     { transform: translateX(5px); }
+}
+
+/* Stat value pop when updated */
+@keyframes countBump {
+  0%   { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+/* History entry slides in from above */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Active payline pip breathing pulse */
+@keyframes pipPulse {
+  0%,100% { opacity: 1; }
+  50%     { opacity: .45; }
+}
+
+/* Ticker live-indicator blink */
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Applied by JS */
+.machine.winning { animation: winGlow    .55s ease-in-out 3; }
+.machine.jackpot { animation: jackpotRave 1s  ease-in-out 4; }
+.machine.losing  { animation: shake      .45s ease-in-out; }
+/* Stat value pop class (brief, removed by JS timer) */
+.bump { animation: countBump .28s ease-out; }
+
+
+/* ── 17. RESPONSIVE — MOBILE ≤ 540px ─────────────
+   On small screens the lever is hidden;
+   the SPIN button and keyboard shortcuts still work.
+─────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+  /* Machine takes full width with complete rounded corners */
+  .machine {
+    border-radius: 18px;
+    border-right: 2px solid var(--p);
+    max-width: 100%;
+  }
+  .machine::after { border-radius: 18px; }
+
+  /* Hide lever on mobile — layout gets too cramped */
+  .lever-housing { display: none; }
+
+  /* Smaller symbol cells so three columns fit */
+  :root { --sh: 80px; }
+  .sym-cell { font-size: 1.9rem; }
+}

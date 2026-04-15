@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Token Burner 3000 — The AI Slot Machine</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="machine">
+    <header class="machine-header">
+      <h1>TOKEN BURNER <span class="neon">3000</span></h1>
+      <p class="tagline">Powered by Stochastic Parrots &amp; Vibes</p>
+    </header>
+
+    <div class="balance-panel">
+      <div class="balance-item">
+        <span class="label">YOUR TOKENS</span>
+        <span id="balance" class="value">100</span>
+      </div>
+      <div class="balance-item">
+        <span class="label">BET</span>
+        <div class="bet-controls">
+          <button id="bet-down" class="bet-btn">−</button>
+          <span id="bet" class="value">10</span>
+          <button id="bet-up" class="bet-btn">+</button>
+        </div>
+      </div>
+      <div class="balance-item">
+        <span class="label">TOKENS WON</span>
+        <span id="total-won" class="value won">0</span>
+      </div>
+    </div>
+
+    <div class="reels-wrapper">
+      <div class="reels-frame">
+        <div class="reels" id="reels">
+          <div class="reel" id="reel-0">
+            <div class="reel-inner" id="reel-inner-0"></div>
+          </div>
+          <div class="reel" id="reel-1">
+            <div class="reel-inner" id="reel-inner-1"></div>
+          </div>
+          <div class="reel" id="reel-2">
+            <div class="reel-inner" id="reel-inner-2"></div>
+          </div>
+        </div>
+        <div class="payline"></div>
+      </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden">
+      <span id="message-text"></span>
+    </div>
+
+    <div class="controls">
+      <button id="spin-btn" class="spin-btn">
+        <span class="spin-label">SPIN</span>
+        <span class="spin-cost" id="spin-cost">(-10 tokens)</span>
+      </button>
+      <button id="max-bet-btn" class="secondary-btn">MAX BET</button>
+      <button id="reset-btn" class="secondary-btn">BEG FOR TOKENS</button>
+    </div>
+
+    <div class="paytable">
+      <h3>PAY TABLE <span class="small">(in hallucinated tokens)</span></h3>
+      <div class="pay-rows" id="pay-rows"></div>
+    </div>
+
+    <footer class="machine-footer">
+      <p>⚠️ This machine operates at 99.97% accuracy*</p>
+      <p class="asterisk">*accuracy defined as "confidently producing output"</p>
+    </footer>
+  </div>
+
+  <div id="win-overlay" class="win-overlay hidden">
+    <div class="win-content">
+      <div class="win-emoji" id="win-emoji"></div>
+      <div class="win-title" id="win-title"></div>
+      <div class="win-subtitle" id="win-subtitle"></div>
+      <div class="win-amount" id="win-amount"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

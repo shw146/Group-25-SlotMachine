@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TokenSlot AI — The Casino That Burns Your Tokens</title>
+  <!-- External stylesheet for all visual styling -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Animated starfield canvas rendered behind everything -->
+  <canvas id="canvas-bg"></canvas>
+
+  <!-- Full-viewport flash overlay triggered on win/jackpot -->
+  <div id="flash"></div>
+
+  <div class="app">
+
+    <!-- ── HEADER ────────────────────────────────────────────── -->
+    <header class="app-header">
+      <div class="header-text">
+        <h1>⚡ TokenSlot AI</h1>
+        <p class="tagline">Where tokens go to die. Operated by algorithms, for algorithms.</p>
+      </div>
+      <!-- Cycles through three high-contrast color themes -->
+      <button class="theme-btn" id="theme-btn" title="Toggle color theme">🎨 Theme</button>
+    </header>
+
+    <!-- ── BALANCE BAR ────────────────────────────────────────── -->
+    <div class="token-bar">
+      <div class="tok-group">
+        <span class="tok-label">Balance</span>
+        <!-- Balance value updated by JS -->
+        <span class="tok-val balance" id="el-balance">
+          100 <small>tokens</small>
+        </span>
+      </div>
+      <div class="tok-group align-end">
+        <span class="tok-label">Tokens Burned</span>
+        <!-- Running total of all tokens spent -->
+        <span class="tok-val burned" id="el-burned">0</span>
+      </div>
+    </div>
+
+    <!-- ── SLOT MACHINE CABINET ──────────────────────────────── -->
+    <div class="machine" id="machine">
+
+      <!-- Decorative row of blinking LED lights across the top of the cabinet -->
+      <div class="machine-lights" id="machine-lights">
+        <!-- Ten light elements injected here by JS at startup -->
+      </div>
+
+      <!-- Main play area: payline labels | reels | pull lever -->
+      <div class="machine-body">
+
+        <!-- Left sidebar: row labels that highlight when that line wins -->
+        <div class="payline-labels">
+          <div class="pl-label" id="pl-label-0">LINE 1</div>
+          <div class="pl-label" id="pl-label-1">LINE 2</div>
+          <div class="pl-label" id="pl-label-2">LINE 3</div>
+        </div>
+
+        <!-- Reels wrapper holds the three spinning reels + row-win overlays -->
+        <div class="reels-wrapper">
+
+          <!-- Three transparent row-highlight overlays; JS adds .win class per row -->
+          <div class="payline-row" id="row-0"></div>
+          <div class="payline-row" id="row-1"></div>
+          <div class="payline-row" id="row-2"></div>
+
+          <!-- The three reel columns; each contains a long scrolling track of symbols -->
+          <div class="reels">
+            <div class="reel" id="reel-0">
+              <div class="reel-track" id="track-0"></div>
+            </div>
+            <div class="reel" id="reel-1">
+              <div class="reel-track" id="track-1"></div>
+            </div>
+            <div class="reel" id="reel-2">
+              <div class="reel-track" id="track-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right sidebar: interactive pull lever that triggers a spin -->
+        <div class="lever-housing">
+          <div class="lever-track">
+            <!-- lever-arm rotates on pull; transform-origin is at the top pivot -->
+            <div class="lever-arm" id="lever-arm">
+              <div class="lever-shaft"></div>
+              <!-- Round handle the user drags/clicks to pull the lever -->
+              <div class="lever-handle" id="lever-handle"></div>
+            </div>
+          </div>
+          <span class="lever-label">PULL</span>
+        </div>
+
+      </div><!-- /.machine-body -->
+
+      <!-- Bet display + spin button below the reels -->
+      <div class="controls">
+        <div class="bet-box">
+          <div class="bet-label">Bet / Spin</div>
+          <div class="bet-val">10 🪙</div>
+        </div>
+        <!-- Primary spin trigger; also becomes "BANKRUPT — RESET" when balance is zero -->
+        <button class="spin-btn" id="spin-btn">🎰 SPIN</button>
+      </div>
+
+    </div><!-- /.machine -->
+
+    <!-- ── RESULT MESSAGE ─────────────────────────────────────── -->
+    <div class="message-box">
+      <!-- Class changes to .win / .lose / .jackpot to apply color styling -->
+      <p class="msg" id="el-msg">Insert tokens to begin. Three paylines are active.</p>
+    </div>
+
+    <!-- ── PAY TABLE (collapsible) ────────────────────────────── -->
+    <details class="paytable">
+      <summary class="pay-hdr">⚙ Paytable — Match 3 symbols on any of 3 lines</summary>
+      <div class="pay-grid">
+        <div class="pay-row"><span>🔥🔥🔥 Meltdown</span><span class="pay-mult">×100</span></div>
+        <div class="pay-row"><span>💎💎💎 Diamond</span><span class="pay-mult">×50</span></div>
+        <div class="pay-row"><span>🤖🤖🤖 Bot</span><span class="pay-mult">×20</span></div>
+        <div class="pay-row"><span>🧠🧠🧠 Brain</span><span class="pay-mult">×15</span></div>
+        <div class="pay-row"><span>⚡⚡⚡ Zap</span><span class="pay-mult">×12</span></div>
+        <div class="pay-row"><span>💾💾💾 Drive</span><span class="pay-mult">×10</span></div>
+        <div class="pay-row"><span>🎯🎯🎯 Prompt</span><span class="pay-mult">×8</span></div>
+        <div class="pay-row"><span>Any pair (per line)</span><span class="pay-mult">×1.5</span></div>
+      </div>
+    </details>
+
+    <!-- ── STATS ROW ──────────────────────────────────────────── -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="el-spins">0</div>
+        <div class="stat-lbl">Spins</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="el-wins">0</div>
+        <div class="stat-lbl">Wins</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="el-best">0</div>
+        <div class="stat-lbl">Best Win</div>
+      </div>
+    </div>
+
+    <!-- ── SPIN HISTORY LOG ───────────────────────────────────── -->
+    <div class="spin-log">
+      <div class="log-header">
+        <span>📋 Spin History</span>
+        <!-- Clears all log entries from the DOM -->
+        <button class="clear-log-btn" id="clear-log">Clear</button>
+      </div>
+      <!-- Log entries prepended here by JS after each spin -->
+      <div class="log-entries" id="log-entries">
+        <p class="log-empty">No spins yet — pull the lever or press SPIN!</p>
+      </div>
+    </div>
+
+  </div><!-- /.app -->
+
+  <!-- Game logic; loaded after DOM so all element IDs are available -->
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokenSlot — The AI Casino</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo">
+        <span class="logo-icon">🤖</span>
+        <h1>TOKEN<span class="accent">SLOT</span></h1>
+        <span class="logo-icon">🤖</span>
+      </div>
+      <p class="tagline">The only casino where the house <em>hallucinates</em> your winnings</p>
+    </header>
+
+    <div class="wallet-bar">
+      <div class="wallet">
+        <span class="wallet-label">YOUR TOKENS</span>
+        <span class="wallet-amount" id="tokenCount">100</span>
+      </div>
+      <div class="wallet">
+        <span class="wallet-label">BET</span>
+        <div class="bet-controls">
+          <button class="bet-btn" id="betDown">−</button>
+          <span class="wallet-amount" id="betAmount">10</span>
+          <button class="bet-btn" id="betUp">+</button>
+        </div>
+      </div>
+      <div class="wallet">
+        <span class="wallet-label">TOTAL WON</span>
+        <span class="wallet-amount" id="totalWon">0</span>
+      </div>
+    </div>
+
+    <div class="machine">
+      <div class="machine-top">
+        <div class="light-row">
+          <span class="light" id="l1"></span>
+          <span class="light" id="l2"></span>
+          <span class="light" id="l3"></span>
+          <span class="light" id="l4"></span>
+          <span class="light" id="l5"></span>
+          <span class="light" id="l6"></span>
+          <span class="light" id="l7"></span>
+        </div>
+      </div>
+
+      <div class="reels-frame">
+        <div class="reels-window">
+          <div class="reel-container" id="reel0">
+            <div class="reel" id="reelStrip0"></div>
+          </div>
+          <div class="reel-divider"></div>
+          <div class="reel-container" id="reel1">
+            <div class="reel" id="reelStrip1"></div>
+          </div>
+          <div class="reel-divider"></div>
+          <div class="reel-container" id="reel2">
+            <div class="reel" id="reelStrip2"></div>
+          </div>
+        </div>
+        <div class="payline"></div>
+      </div>
+
+      <div class="result-panel">
+        <p class="result-text" id="resultText">Insert tokens to play</p>
+      </div>
+
+      <div class="controls">
+        <button class="btn-spin" id="spinBtn">
+          <span class="spin-label">SPIN</span>
+          <span class="spin-cost">−<span id="spinCostLabel">10</span> tokens</span>
+        </button>
+      </div>
+
+      <div class="machine-bottom">
+        <div class="light-row">
+          <span class="light" id="l8"></span>
+          <span class="light" id="l9"></span>
+          <span class="light" id="l10"></span>
+          <span class="light" id="l11"></span>
+          <span class="light" id="l12"></span>
+          <span class="light" id="l13"></span>
+          <span class="light" id="l14"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="paytable">
+      <h2 class="paytable-title">PAY TABLE</h2>
+      <div class="paytable-grid" id="paytable"></div>
+    </div>
+
+    <div class="log-panel">
+      <h3>AUDIT LOG <span class="log-note">(definitely not hallucinated)</span></h3>
+      <ul id="logList"></ul>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal">
+      <div class="modal-icon" id="modalIcon"></div>
+      <h2 id="modalTitle"></h2>
+      <p id="modalMsg"></p>
+      <button class="btn-modal" id="modalBtn">OK</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

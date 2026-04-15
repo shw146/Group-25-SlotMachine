@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokenSlot — The AI Casino</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Animated casino background gradient (purely decorative) -->
+  <div class="casino-bg" aria-hidden="true"></div>
+
+  <!-- Full-page canvas for coin/confetti particle effects -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <div class="app">
+
+    <!-- ── Title ─────────────────────────────────────────── -->
+    <header>
+      <h1>🤖 TOKEN<span>SLOT</span></h1>
+      <p class="tagline">Where your prompts go to die (and your wallet too)</p>
+    </header>
+
+    <!-- ── Theme switcher + mute button ──────────────────── -->
+    <div class="controls-bar">
+      <div class="theme-bar" role="group" aria-label="Color theme">
+        <span class="bar-label">Theme:</span>
+        <!-- Three high-contrast themes; JS adds .active to the selected one -->
+        <button class="theme-btn active" data-theme="dark">Dark</button>
+        <button class="theme-btn"        data-theme="neon">Neon</button>
+        <button class="theme-btn"        data-theme="retro">Retro</button>
+      </div>
+      <!-- Mute toggle; emoji flips between 🔊 and 🔇 via JS -->
+      <button class="mute-btn" id="mute-btn" aria-label="Toggle sound">🔊</button>
+    </div>
+
+    <!-- ── HUD: balance, per-line bet, total won ─────────── -->
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">💰 Token Balance</span>
+        <span class="hud-value" id="balance">1000</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">🎰 Bet / Line</span>
+        <div class="bet-controls">
+          <button id="bet-down" aria-label="Decrease bet">−</button>
+          <span class="hud-value" id="bet">10</span>
+          <button id="bet-up"   aria-label="Increase bet">+</button>
+        </div>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">🏆 Total Won</span>
+        <span class="hud-value" id="winnings">0</span>
+      </div>
+    </div>
+
+    <!-- ── Main slot machine ──────────────────────────────── -->
+    <div class="machine">
+      <div class="machine-body">
+
+        <!-- Three-row reel display (3 reels × 3 visible rows = 9 symbols) -->
+        <div class="reels-window" id="reels-window">
+
+          <!-- Payline overlay bars — one per row, lit up when that row wins -->
+          <div class="payline payline-top" id="payline-0" aria-hidden="true"></div>
+          <div class="payline payline-mid" id="payline-1" aria-hidden="true"></div>
+          <div class="payline payline-bot" id="payline-2" aria-hidden="true"></div>
+
+          <!-- Reel 0 (left) -->
+          <div class="reel-column" id="reel-0">
+            <div class="reel-strip" id="strip-0"></div>
+          </div>
+          <div class="reel-divider"></div>
+
+          <!-- Reel 1 (center) -->
+          <div class="reel-column" id="reel-1">
+            <div class="reel-strip" id="strip-1"></div>
+          </div>
+          <div class="reel-divider"></div>
+
+          <!-- Reel 2 (right) -->
+          <div class="reel-column" id="reel-2">
+            <div class="reel-strip" id="strip-2"></div>
+          </div>
+
+          <!-- Gradient overlay fades the top/bottom partial symbols -->
+          <div class="reel-vignette" aria-hidden="true"></div>
+        </div>
+
+        <!-- Live result announcement (read by screen readers via aria-live) -->
+        <div class="result-banner" id="result-banner"
+             role="status" aria-live="polite"></div>
+
+        <!-- Spin button; label shows total cost = bet × 3 lines -->
+        <div class="controls">
+          <button class="spin-btn" id="spin-btn">
+            SPIN — <span id="spin-cost">30</span> tokens total
+          </button>
+        </div>
+
+      </div><!-- .machine-body -->
+
+      <!-- ── Draggable lever (pull down to spin) ──────────── -->
+      <div class="lever-wrap" id="lever-wrap"
+           role="button" aria-label="Pull lever to spin" tabindex="0">
+        <!-- Instructional hint above the lever -->
+        <div class="lever-hint" aria-hidden="true">PULL</div>
+        <!-- Lever assembly; rotated via inline style during drag -->
+        <div class="lever" id="lever">
+          <div class="lever-ball"></div>  <!-- red knob at top -->
+          <div class="lever-rod"></div>   <!-- metal shaft -->
+          <div class="lever-base"></div>  <!-- pivot mount at bottom -->
+        </div>
+        <!-- Downward arrow hint below the lever -->
+        <div class="lever-arrow" aria-hidden="true">↓</div>
+      </div>
+
+    </div><!-- .machine -->
+
+    <!-- ── Paytable ───────────────────────────────────────── -->
+    <div class="paytable">
+      <h2>📋 Paytable — Multipliers per winning line (bet × multiplier)</h2>
+      <table>
+        <thead>
+          <tr><th>Combination</th><th>Payout</th><th>Flavour</th></tr>
+        </thead>
+        <!-- Rows are injected by buildPaytable() in slot.js -->
+        <tbody id="paytable-body"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Spin history log ───────────────────────────────── -->
+    <div class="history-section">
+      <h2>📜 Spin History</h2>
+      <!-- Each spin prepended as <li> by addHistory() in slot.js -->
+      <ul id="history-list" aria-label="Recent spin results"></ul>
+    </div>
+
+  </div><!-- .app -->
+
+  <script src="slot.js"></script>
+</body>
+</html>

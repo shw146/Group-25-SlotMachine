@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TokenSlot — The AI Casino</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="casino">
+    <header class="casino-header">
+      <div class="neon-sign">TOKEN<span class="blink">SLOT</span></div>
+      <div class="tagline">Where Your Context Window Goes to Die</div>
+    </header>
+
+    <div class="wallet-bar">
+      <div class="wallet">
+        <span class="wallet-icon">💰</span>
+        <span class="wallet-label">Your Tokens</span>
+        <span class="wallet-amount" id="tokenCount">100</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="stat-label">Burned</span><span id="totalSpent">0</span></div>
+        <div class="stat"><span class="stat-label">Won</span><span id="totalWon">0</span></div>
+        <div class="stat"><span class="stat-label">Spins</span><span id="totalSpins">0</span></div>
+      </div>
+    </div>
+
+    <div class="machine">
+      <div class="machine-body">
+        <div class="screen-border">
+          <div class="message-bar" id="messageBar">Insert tokens to begin inference...</div>
+        </div>
+
+        <div class="reels-container">
+          <div class="reel-wrapper">
+            <div class="reel" id="reel0">
+              <div class="reel-strip" id="strip0"></div>
+            </div>
+          </div>
+          <div class="reel-wrapper">
+            <div class="reel" id="reel1">
+              <div class="reel-strip" id="strip1"></div>
+            </div>
+          </div>
+          <div class="reel-wrapper">
+            <div class="reel" id="reel2">
+              <div class="reel-strip" id="strip2"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="win-line"></div>
+
+        <div class="controls">
+          <div class="bet-control">
+            <button class="bet-btn" id="betDown">−</button>
+            <div class="bet-display">
+              <span class="bet-label">BET</span>
+              <span class="bet-amount" id="betAmount">10</span>
+              <span class="bet-sublabel">tokens/spin</span>
+            </div>
+            <button class="bet-btn" id="betUp">+</button>
+          </div>
+          <button class="spin-btn" id="spinBtn">
+            <span class="spin-icon">⚡</span>
+            <span class="spin-text">GENERATE</span>
+          </button>
+          <button class="max-btn" id="maxBet">MAX BET</button>
+        </div>
+      </div>
+
+      <div class="lever-side">
+        <div class="lever-track">
+          <div class="lever" id="lever">
+            <div class="lever-ball"></div>
+            <div class="lever-arm"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paytable">
+      <div class="paytable-title">⬥ PAY TABLE ⬥</div>
+      <div class="pay-rows" id="payRows"></div>
+    </div>
+
+    <div class="win-overlay hidden" id="winOverlay">
+      <div class="win-content">
+        <div class="win-title" id="winTitle">JACKPOT!</div>
+        <div class="win-amount" id="winAmount">+500 tokens</div>
+        <div class="win-quip" id="winQuip"></div>
+        <button class="dismiss-btn" id="dismissWin">COLLECT TOKENS</button>
+      </div>
+    </div>
+
+    <div class="broke-overlay hidden" id="brokeOverlay">
+      <div class="broke-content">
+        <div class="broke-title">CONTEXT EXHAUSTED</div>
+        <div class="broke-msg">You've run out of tokens.<br>Just like a model at 128k context.</div>
+        <button class="refill-btn" id="refillBtn">💳 SUBSCRIBE FOR MORE</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

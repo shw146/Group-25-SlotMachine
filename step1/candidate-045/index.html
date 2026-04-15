@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Token Slots</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="machine">
+    <div class="marquee">
+      <span>⚡ AI TOKEN SLOTS ⚡ SPEND TOKENS TO WIN TOKENS ⚡</span>
+    </div>
+
+    <div class="screen">
+      <div class="token-display">
+        <span class="label">YOUR TOKENS</span>
+        <span class="token-count" id="tokenCount">100</span>
+      </div>
+
+      <div class="reels-container">
+        <div class="reel-window">
+          <div class="reel" id="reel0"></div>
+        </div>
+        <div class="reel-window">
+          <div class="reel" id="reel1"></div>
+        </div>
+        <div class="reel-window">
+          <div class="reel" id="reel2"></div>
+        </div>
+        <div class="payline"></div>
+      </div>
+
+      <div class="message-box" id="messageBox">
+        <p id="messageText">Insert tokens to begin your alignment journey.</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="bet-area">
+        <span class="label">BET</span>
+        <div class="bet-buttons">
+          <button class="bet-btn active" data-bet="5">5</button>
+          <button class="bet-btn" data-bet="10">10</button>
+          <button class="bet-btn" data-bet="25">25</button>
+        </div>
+      </div>
+      <button class="spin-btn" id="spinBtn">SPIN</button>
+    </div>
+
+    <div class="paytable">
+      <div class="paytable-title">PAYTABLE</div>
+      <div class="paytable-grid" id="paytableGrid"></div>
+    </div>
+
+    <div class="ledge"></div>
+  </div>
+
+  <div class="history-panel">
+    <div class="history-title">SESSION LOG</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
