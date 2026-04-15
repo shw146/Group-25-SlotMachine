@@ -1,0 +1,3 @@
+Refinement prompt:
+
+change this slot machine program to make fun of ai, create options for light and dark mode, make sure that there is audio playing when the wheel spins, remove the magic numbers in the code and replace them with variables, and have the spin log and session info next to the side of the slot machine
