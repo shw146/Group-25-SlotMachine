@@ -1,0 +1,3 @@
+refinement prompt:
+
+change the slot machine program to have more contrast in dark mode, create labels for each emoji, and make the program make fun of AI more
