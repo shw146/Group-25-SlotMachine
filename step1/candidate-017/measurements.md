@@ -13,3 +13,14 @@
 |Runs in browser?|Yes
 |App Quality Notes| The slot's run individually which makes the game feel really slow. I like the shake when you get a bad result. The sounds are too quite. Good balance of wins to losses. 
 |Code Quality Notes| The documentation is pretty consistent, and there are in-line comments as well, not just comments on the functions. Based on the editor it seems like there may be a lot of errors in the last portion of the code (the colors on VScode are breaking). 
+
+#### Rubric Score
+
+| Category | Score |
+| :--- | :--- |
+| Functionality | 19/25 |
+| Code Quality | 15/20 |
+| Thematic Consistency | 20/25 |
+| Accessibility | 2/5 |
+| UI/UX | 20/25 |
+| **Total** | **76/100** |
