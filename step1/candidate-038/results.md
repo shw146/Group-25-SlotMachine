@@ -16,8 +16,8 @@
 
 | Category | Score and Notes |
 | --- | --- |
-| Functionality | |
-| Code quality | |
-| Thematic consistency | |
-| Accessibility | |
-| UI/UX | |
+| Functionality | 25 |
+| Code quality | 17 |
+| Thematic consistency | 18 |
+| Accessibility | 5 |
+| UI/UX | 15 |
