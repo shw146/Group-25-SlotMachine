@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hallucinato-Matic 9000 — AI Slot Machine</title>
+  <!-- All visual styles live in style.css; game logic lives in game.js -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Full-viewport flash overlay briefly coloured on wins/jackpots -->
+  <div id="flash"></div>
+
+  <div class="app">
+
+    <!-- ══════════════════════════════════════════════════════
+         HEADER — title, branding, and dark/light mode toggle
+         ══════════════════════════════════════════════════════ -->
+    <header class="app-header">
+      <span class="header-logo" aria-hidden="true">🤖</span>
+      <div class="header-text">
+        <h1>Hallucinato-Matic 9000</h1>
+        <p class="tagline">Confidently wrong since 2023. Results not guaranteed. No refunds.</p>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle theme">🌙</button>
+    </header>
+
+    <!-- ══════════════════════════════════════════════════════
+         BALANCE BAR
+         Shows current balance, a top-up button (adds $100),
+         and a running total of money wagered.
+         ══════════════════════════════════════════════════════ -->
+    <div class="balance-bar">
+
+      <!-- Left cell: live balance updated by JS -->
+      <div class="bal-cell">
+        <span class="bal-label">Balance</span>
+        <span class="bal-val" id="el-balance">$100</span>
+      </div>
+
+      <!-- Centre: top-up button — adds $100 to the player's balance -->
+      <button class="topup-btn" id="topup-btn" title="Inject $100 training data">
+        ＋ Inject $100
+      </button>
+
+      <!-- Right cell: cumulative amount wagered this session -->
+      <div class="bal-cell right">
+        <span class="bal-label">Wagered</span>
+        <span class="bal-val dimmed" id="el-wagered">$0</span>
+      </div>
+
+    </div><!-- /.balance-bar -->
+
+    <!-- ══════════════════════════════════════════════════════
+         MAIN AREA — two-column layout:
+           Left:  machine cabinet, message box, paytable
+           Right: session info / stats, spin history log
+         ══════════════════════════════════════════════════════ -->
+    <div class="app-main">
+
+      <!-- ── LEFT COLUMN ─────────────────────────────────────── -->
+      <div class="app-left">
+
+        <!-- ══════════════════════════════════════════════════
+             SLOT MACHINE CABINET
+             ══════════════════════════════════════════════════ -->
+        <div class="machine" id="machine">
+
+          <!-- Decorative LED strip along the very top of the cabinet;
+               light elements are injected by JS (buildLights) -->
+          <div class="machine-lights" id="machine-lights"></div>
+
+          <!-- Cabinet face-plate title bar -->
+          <div class="machine-face-title">
+            <span class="face-deco">▬ AI ▬</span>
+            <span class="face-name">HALLUCINATO-MATIC 9000</span>
+            <span class="face-deco">▬ AI ▬</span>
+          </div>
+
+          <!-- ── MAIN PLAY AREA ─────────────────────────────────
+               Layout:  [payline label] [reels] [lever]
+               ─────────────────────────────────────────────────── -->
+          <div class="machine-body">
+
+            <!-- Single-payline indicator on the left side of the reels -->
+            <div class="payline-side left" aria-label="Payline indicator">
+              <div class="ps-line"></div>
+              <div class="ps-label">PAY<br>LINE</div>
+              <div class="ps-arrow">▶</div>
+            </div>
+
+            <!-- ── REELS WRAPPER ──
+                 Clips the three reel strips to a 3-row viewport. -->
+            <div class="reels-wrapper">
+
+              <!-- Three spinning reel columns -->
+              <div class="reels">
+
+                <div class="reel" id="reel-0">
+                  <div class="reel-track" id="track-0"></div>
+                </div>
+
+                <div class="reel" id="reel-1">
+                  <div class="reel-track" id="track-1"></div>
+                </div>
+
+                <div class="reel" id="reel-2">
+                  <div class="reel-track" id="track-2"></div>
+                </div>
+
+              </div><!-- /.reels -->
+
+              <!-- Middle-row payline highlight -->
+              <div class="payline-overlay" id="payline-overlay"></div>
+
+            </div><!-- /.reels-wrapper -->
+
+            <!-- Payline indicator mirrored on the right side -->
+            <div class="payline-side right" aria-label="Payline indicator">
+              <div class="ps-arrow">◀</div>
+              <div class="ps-label">PAY<br>LINE</div>
+              <div class="ps-line"></div>
+            </div>
+
+            <!-- ── DRAGGABLE LEVER ──
+                 The player drags the red ball handle downward.
+                 Releasing it past 60% of the track height fires a spin. -->
+            <div class="lever-section">
+
+              <div class="lever-track" id="lever-track">
+                <div class="lever-handle" id="lever-handle"
+                     title="Drag down to spin (or press SPACE)"></div>
+              </div><!-- /.lever-track -->
+
+              <span class="lever-label">PULL</span>
+
+            </div><!-- /.lever-section -->
+
+          </div><!-- /.machine-body -->
+
+          <!-- ── CONTROLS ──────────────────────────────────────────
+               Bet adjustment row  +  main SPIN button.
+               ─────────────────────────────────────────────────────── -->
+          <div class="controls">
+
+            <div class="bet-row">
+              <span class="bet-label">BET</span>
+              <button class="bet-adj" id="bet-minus" aria-label="Decrease bet">−</button>
+              <span class="bet-display" id="bet-display">$5</span>
+              <button class="bet-adj" id="bet-plus"  aria-label="Increase bet">＋</button>
+            </div>
+
+            <button class="spin-btn" id="spin-btn">
+              🤖 SPIN
+              <small class="spin-hint">SPACE</small>
+            </button>
+
+          </div><!-- /.controls -->
+
+        </div><!-- /.machine -->
+
+        <!-- ══════════════════════════════════════════════════
+             RESULT MESSAGE — text updated after every spin
+             ══════════════════════════════════════════════════ -->
+        <div class="message-box">
+          <p class="msg" id="el-msg">
+            Drag the lever or press SPIN to begin. SPACE also works!
+          </p>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════
+             REWARD SCHEDULE (collapsible)
+             Middle-row only; 3-of-a-kind pays the multiplier,
+             any pair pays 1.5×.
+             ══════════════════════════════════════════════════ -->
+        <details class="paytable">
+          <summary class="pay-hdr">💰 Reward Schedule — Middle row only</summary>
+          <div class="pay-grid">
+            <div class="pay-row"><span>🎯🎯🎯 Actually Correct</span>         <span class="pay-x">×100</span></div>
+            <div class="pay-row"><span>🔮🔮🔮 Confident Hallucination</span>  <span class="pay-x">×50</span></div>
+            <div class="pay-row"><span>⚡⚡⚡ GPU Meltdown</span>             <span class="pay-x">×15</span></div>
+            <div class="pay-row"><span>🧠🧠🧠 Emergent Behavior</span>        <span class="pay-x">×8</span></div>
+            <div class="pay-row"><span>📊📊📊 Overfit Model</span>            <span class="pay-x">×5</span></div>
+            <div class="pay-row"><span>💬💬💬 Context Window</span>           <span class="pay-x">×3</span></div>
+            <div class="pay-row"><span>🤖🤖🤖 Baseline Model</span>           <span class="pay-x">×2</span></div>
+            <div class="pay-row dim"><span>Any pair (middle row)</span>        <span class="pay-x">×1.5</span></div>
+          </div>
+        </details>
+
+      </div><!-- /.app-left -->
+
+      <!-- ── RIGHT COLUMN ────────────────────────────────────── -->
+      <div class="app-right">
+
+        <!-- ══════════════════════════════════════════════════
+             SESSION INFO — updated after each spin by JS
+             ══════════════════════════════════════════════════ -->
+        <div class="session-panel">
+          <div class="session-header">📈 Session Info</div>
+          <div class="stats">
+            <div class="stat"><div class="stat-val" id="el-spins">0</div><div class="stat-lbl">Spins</div></div>
+            <div class="stat"><div class="stat-val" id="el-wins">0</div> <div class="stat-lbl">Wins</div></div>
+            <div class="stat"><div class="stat-val" id="el-best">$0</div><div class="stat-lbl">Best Win</div></div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════
+             SPIN HISTORY — prepended by JS after every spin
+             ══════════════════════════════════════════════════ -->
+        <div class="spin-log">
+          <div class="log-header">
+            <span>📋 Spin History</span>
+            <button class="clear-btn" id="clear-log">Clear</button>
+          </div>
+          <div class="log-entries" id="log-entries">
+            <p class="log-empty">No spins yet — pull the lever or press SPIN!</p>
+          </div>
+        </div>
+
+      </div><!-- /.app-right -->
+
+    </div><!-- /.app-main -->
+
+  </div><!-- /.app -->
+
+  <!-- Game logic loaded after DOM so all element IDs are available -->
+  <script src="game.js"></script>
+</body>
+</html>
