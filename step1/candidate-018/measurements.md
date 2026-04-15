@@ -13,3 +13,14 @@
 |Runs in browser?|Yes
 |App Quality Notes| The game/slot cycle is really slow, and the blur during randomizaition makes it a little less fun. The graphics when winning are good, they add a sence of excitment. The tracking of previous results in informative and unobtrusive.      
 |Code Quality Notes| The documentation syle is inconsistent. Some comments are really informative, and comment on spefic decisions that were made in addition to base functionality. There appear to be a few errors in the middle of the file. 
+
+#### Rubric Score
+
+| Category | Score |
+| :--- | :--- |
+| Functionality | 19/25 |
+| Code Quality | 16/20 |
+| Thematic Consistency | 19/25 |
+| Accessibility | 3/5 |
+| UI/UX | 18/25 |
+| **Total** | **75/100** |
