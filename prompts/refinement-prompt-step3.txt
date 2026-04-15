@@ -1,0 +1,3 @@
+refinement prompt:
+
+Build a light, high-contrast slot game. Use a draggable lever, spacebar keys, and adjustable bets with a top-up. Reels must slow down to a middle-row win. Include heavy comments in the code.
