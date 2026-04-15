@@ -1,15 +1,15 @@
 |Field|Notes|
 |---|---|
 |Run ID|candidate-019|
-|Timestamp|12:59:41|
+|Timestamp|20:24:17|
 |Model + version string|Sonnet 4.6 2.1.205|
-|Input tokens|35|
-|Output tokens|4k|
-|Total tokens|4k|
-|Wall-clock time (s)|1 minute 24 seconds|
-|Tool-reported time (s)|1 minute 24 seconds|
+|Input tokens|82|
+|Output tokens|60.4k|
+|Total tokens|60.4k|
+|Wall-clock time (s)|13 minute 1 seconds|
+|Tool-reported time (s)|13 minute 1 seconds|
 |Files produced|1|
-|Lines of code|439|
+|Lines of code|816|
 |Runs in browser?|Yes
-|App Quality Notes| The graphics on the app do not work. There is no penalty for going into the negatives, so the "game" or winning/losing aspect of the app is not present. |         
-|Code Quality Notes| The <style> is indented properly, but the </style> could be formatted better. The function names are little confusing, they are not very specific so some functions seems to preform the same job. 
+|App Quality Notes| The graphics are a little overwhelming, the middle slot is not clearly defined. The audio is good, the slots seems to be going in different directions. The app lets you choose your betting amount.       
+|Code Quality Notes| The section documentation is good, but there is a lack of in line comments. There don't seem to be any errors. The indentations could be improved. 
