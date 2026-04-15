@@ -22,8 +22,8 @@
 | Code Quality         | 15/20  |
 | Thematic Consistency | 21/25  |
 | Accessibility        | 4/5    |
-| UI/UX                | 22/25  |
-| **Total**            | 82/100 |
+| UI/UX                | 20/25  |
+| **Total**            | 80/100 |
 
 ### App Quality Notes
 
