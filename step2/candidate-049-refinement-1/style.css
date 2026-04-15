@@ -1,0 +1,471 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOKENSLOT — style.css
+   Three high-contrast colour themes, all layout, animations and visual FX.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Theme tokens: Dark (default) ───────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg:            #0a0a12;
+  --surface:       #13131f;
+  --panel:         #1a1a2e;
+  --border:        #2a2a4a;
+  --accent:        #7c3aed;
+  --accent2:       #06b6d4;
+  --gold:          #f59e0b;
+  --green:         #10b981;
+  --red:           #ef4444;
+  --text:          #e2e8f0;
+  --muted:         #64748b;
+  --reel-bg:       #0f0f1a;
+  --lever-knob:    radial-gradient(circle at 35% 35%, #f87171, #b91c1c);
+  --payline-clr:   rgba(245,158,11,.5);
+  --win-glow:      #10b981;
+  --jackpot-glow:  #f59e0b;
+}
+
+/* ── Theme tokens: Neon (high-contrast bright neon on black) ────────────── */
+[data-theme="neon"] {
+  --bg:            #000000;
+  --surface:       #080808;
+  --panel:         #0d0d1a;
+  --border:        rgba(255,0,255,.3);
+  --accent:        #ff00ff;
+  --accent2:       #00ffff;
+  --gold:          #ffff00;
+  --green:         #00ff88;
+  --red:           #ff3355;
+  --text:          #ffffff;
+  --muted:         #aaaaaa;
+  --reel-bg:       #000000;
+  --lever-knob:    radial-gradient(circle at 35% 35%, #ff44ff, #880055);
+  --payline-clr:   rgba(255,255,0,.65);
+  --win-glow:      #00ff88;
+  --jackpot-glow:  #ffff00;
+}
+
+/* ── Theme tokens: Retro (green phosphor CRT, very high contrast) ───────── */
+[data-theme="retro"] {
+  --bg:            #000800;
+  --surface:       #001200;
+  --panel:         #001a00;
+  --border:        rgba(0,255,0,.2);
+  --accent:        #00cc00;
+  --accent2:       #00ff44;
+  --gold:          #aaff00;
+  --green:         #00ff00;
+  --red:           #ff4400;
+  --text:          #00ee00;
+  --muted:         #006600;
+  --reel-bg:       #000800;
+  --lever-knob:    radial-gradient(circle at 35% 35%, #00ff44, #005500);
+  --payline-clr:   rgba(0,255,0,.4);
+  --win-glow:      #00ff00;
+  --jackpot-glow:  #aaff00;
+}
+
+/* ── Geometry constants (adjust here to resize the whole reel display) ──── */
+:root {
+  --symbol-h: 120px;   /* height of each individual symbol cell            */
+  --rows:     3;       /* visible rows per reel column                     */
+  --reel-h:   360px;   /* total reel window height = --symbol-h × --rows   */
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background .4s, color .4s;
+}
+
+/* ── Full-page particle canvas (pointer-events off so it never blocks input) */
+#particle-canvas {
+  position: fixed; inset: 0; z-index: 998;
+  pointer-events: none;
+  width: 100%; height: 100%;
+}
+
+/* ── Animated background gradient (purely decorative pulse) ─────────────── */
+.casino-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%,  rgba(124,58,237,.2)  0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 80% 100%, rgba(6,182,212,.14)  0%, transparent 70%);
+  animation: bgPulse 6s ease-in-out infinite alternate;
+}
+[data-theme="neon"] .casino-bg {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%,  rgba(255,0,255,.2)  0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 80% 100%, rgba(0,255,255,.15) 0%, transparent 70%);
+}
+[data-theme="retro"] .casino-bg {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%,  rgba(0,200,0,.15) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 80% 100%, rgba(0,255,68,.1) 0%, transparent 70%);
+}
+@keyframes bgPulse { from { opacity: .7; } to { opacity: 1; } }
+
+/* ── App layout ─────────────────────────────────────────────────────────── */
+.app {
+  position: relative; z-index: 1;
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex; flex-direction: column; gap: 1.25rem;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+header { text-align: center; }
+header h1 {
+  font-size: 2.8rem; font-weight: 900; letter-spacing: -1px;
+  color: var(--accent);
+  text-shadow:
+    0 0 20px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 50px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+header h1 span { color: var(--accent2); }
+.tagline { margin-top: .25rem; font-size: .85rem; color: var(--muted); font-style: italic; }
+
+/* ── Controls bar (theme switcher + mute) ───────────────────────────────── */
+.controls-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem;
+}
+.theme-bar { display: flex; align-items: center; gap: .4rem; }
+.bar-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+.theme-btn {
+  padding: .25rem .75rem; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  font-size: .75rem; font-weight: 600; cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.theme-btn:hover        { border-color: var(--accent); color: var(--text); }
+.theme-btn.active       { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+.mute-btn {
+  padding: .3rem .65rem; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font-size: 1.1rem; cursor: pointer; line-height: 1;
+  transition: background .2s, opacity .2s;
+}
+.mute-btn:hover  { background: var(--panel); }
+.mute-btn.muted  { opacity: .4; }
+
+/* ── HUD strip ──────────────────────────────────────────────────────────── */
+.hud { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; }
+.hud-item {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: .6rem 1.2rem;
+  display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  flex: 1; min-width: 130px;
+}
+.hud-label { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.hud-value { font-size: 1.4rem; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
+
+.bet-controls { display: flex; align-items: center; gap: .5rem; }
+.bet-controls button {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font-size: 1rem; cursor: pointer; line-height: 1;
+  transition: background .15s, transform .1s;
+}
+.bet-controls button:hover { background: var(--accent); transform: scale(1.1); }
+
+/* ── Machine body ───────────────────────────────────────────────────────── */
+.machine {
+  display: flex; align-items: stretch;
+  background: var(--panel); border: 2px solid var(--border);
+  border-radius: 24px; overflow: hidden;
+  box-shadow:
+    0 0 40px color-mix(in srgb, var(--accent) 15%, transparent),
+    0 4px 40px #0009;
+  transition: box-shadow .4s;
+}
+.machine-body {
+  flex: 1; padding: 1.5rem 1.5rem 1.25rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+
+/* ── Reel window — contains all 3 columns, each showing 3 rows ──────────── */
+.reels-window {
+  position: relative;
+  display: flex;
+  background: var(--reel-bg);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  height: var(--reel-h);   /* 360px (3 × 120px) */
+}
+
+/* ── Reel column (one per reel, scrolls vertically) ────────────────────── */
+.reel-column {
+  flex: 1; overflow: hidden;
+  height: var(--reel-h); position: relative;
+}
+.reel-strip {
+  display: flex; flex-direction: column;
+  will-change: transform;  /* GPU compositing hint for smooth animation */
+}
+
+/* Apply motion blur while the reel is in fast-spin phase */
+.reel-column.spinning .reel-strip { filter: blur(3px); }
+
+/* ── Symbol cell ────────────────────────────────────────────────────────── */
+.symbol {
+  height: var(--symbol-h);   /* 120px — matches JS SYMBOL_H constant */
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; font-size: 2.4rem; line-height: 1;
+  user-select: none; flex-shrink: 0;
+}
+.symbol .sym-label {
+  font-size: .55rem; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--muted); font-weight: 600;
+}
+/* Pop + glow applied to symbols on a winning row */
+.symbol.win-highlight {
+  filter: drop-shadow(0 0 14px var(--win-glow)) brightness(1.35);
+  animation: symPop .35s ease-out forwards;
+}
+@keyframes symPop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.25); }
+  100% { transform: scale(1.1); }
+}
+
+/* ── Dividers between columns ───────────────────────────────────────────── */
+.reel-divider { width: 2px; background: var(--border); flex-shrink: 0; }
+
+/* ── Payline bars (horizontal lines, one per row) ───────────────────────── */
+.payline {
+  position: absolute; left: 0; right: 0;
+  height: 3px; pointer-events: none; z-index: 2;
+  transition: opacity .3s;
+}
+/* Each line sits at the vertical centre of its row */
+.payline-top { top: calc(var(--symbol-h) * 0.5 - 1px); background: var(--payline-clr); opacity: .35; }
+.payline-mid { top: calc(var(--symbol-h) * 1.5 - 1px); background: var(--payline-clr); opacity: .6;  }
+.payline-bot { top: calc(var(--symbol-h) * 2.5 - 1px); background: var(--payline-clr); opacity: .35; }
+
+/* Active (winning) payline glows and pulses */
+.payline.active {
+  opacity: 1 !important;
+  background: var(--win-glow);
+  box-shadow: 0 0 8px var(--win-glow), 0 0 20px var(--win-glow);
+  animation: paylinePulse .4s ease-in-out 5;
+}
+@keyframes paylinePulse { 0%,100% { opacity: 1; } 50% { opacity: .15; } }
+
+/* ── Top/bottom vignette softens symbols entering/exiting the window ────── */
+.reel-vignette {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--reel-bg) 0%,
+    transparent 16%,
+    transparent 84%,
+    var(--reel-bg) 100%
+  );
+}
+
+/* ── Reel window border flash on win ────────────────────────────────────── */
+.reels-window.win-flash     { animation: winFlash    .45s ease-in-out 3; }
+.reels-window.jackpot-flash { animation: jackpotFlash .28s ease-in-out 8; }
+@keyframes winFlash {
+  0%,100% { box-shadow: none; }
+  50%     { box-shadow: 0 0 0 4px var(--win-glow), 0 0 30px var(--win-glow); }
+}
+@keyframes jackpotFlash {
+  0%,100% { box-shadow: none; }
+  50%     { box-shadow: 0 0 0 6px var(--jackpot-glow), 0 0 60px var(--jackpot-glow), 0 0 120px var(--accent); }
+}
+
+/* ── Result banner ──────────────────────────────────────────────────────── */
+.result-banner {
+  min-height: 2.4rem; text-align: center;
+  font-size: .92rem; font-weight: 700;
+  border-radius: 8px; padding: .35rem .75rem;
+  opacity: 0; transition: opacity .3s;
+}
+.result-banner.show    { opacity: 1; }
+.result-banner.win     { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid var(--green); }
+.result-banner.lose    { background: rgba(239,68,68,.1);   color: var(--red);   border: 1px solid var(--red);   }
+.result-banner.jackpot { background: rgba(245,158,11,.2);  color: var(--gold);  border: 1px solid var(--gold);  font-size: 1.1rem; }
+
+/* ── Spin button ────────────────────────────────────────────────────────── */
+.controls { display: flex; justify-content: center; }
+.spin-btn {
+  padding: .85rem 2.5rem; font-size: 1rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  border: none; border-radius: 50px; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 65%, var(--accent2)));
+  color: #fff;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 50%, transparent);
+  transition: transform .12s, box-shadow .12s, opacity .2s;
+  position: relative; overflow: hidden;
+}
+/* Sheen overlay */
+.spin-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.12), transparent);
+  border-radius: inherit; pointer-events: none;
+}
+.spin-btn:hover:not(:disabled)  { transform: translateY(-2px); box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 60%, transparent); }
+.spin-btn:active:not(:disabled) { transform: translateY(1px); }
+.spin-btn:disabled               { opacity: .4; cursor: not-allowed; }
+
+/* ── Lever assembly ─────────────────────────────────────────────────────── */
+.lever-wrap {
+  width: 60px;
+  background: var(--surface); border-left: 2px solid var(--border);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: .4rem;
+  cursor: grab; user-select: none;
+  transition: background .15s;
+  position: relative; padding: .5rem 0;
+}
+.lever-wrap:hover  { background: var(--panel); }
+.lever-wrap:active { cursor: grabbing; }
+
+/* "PULL" text above the lever */
+.lever-hint {
+  font-size: .52rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); line-height: 1;
+  transition: color .2s;
+}
+/* Down arrow hint below the lever */
+.lever-arrow {
+  font-size: 1rem; color: var(--muted);
+  animation: arrowBounce 1.4s ease-in-out infinite;
+}
+@keyframes arrowBounce {
+  0%,100% { transform: translateY(0); opacity: .5; }
+  50%     { transform: translateY(4px); opacity: 1; }
+}
+.lever-wrap:hover .lever-hint  { color: var(--accent); }
+.lever-wrap:hover .lever-arrow { color: var(--accent); }
+
+/* Lever rotates around its bottom pivot (the base mount) */
+.lever {
+  display: flex; flex-direction: column; align-items: center;
+  transform-origin: center 92%;   /* pivot near the lever-base */
+}
+/* Spring-back easing class added/removed by JS */
+.lever.spring { transition: transform .42s cubic-bezier(.25, 1.55, .5, 1); }
+
+/* Red ball knob */
+.lever-ball {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--lever-knob);
+  box-shadow: 0 3px 10px #0008;
+  transition: transform .15s, box-shadow .15s;
+  flex-shrink: 0;
+}
+.lever-wrap:hover .lever-ball {
+  transform: scale(1.12);
+  box-shadow: 0 3px 18px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Metal shaft */
+.lever-rod {
+  width: 7px; height: 72px;
+  background: linear-gradient(180deg, #94a3b8, #475569);
+  border-radius: 3px; flex-shrink: 0;
+}
+
+/* Pivot base at the bottom */
+.lever-base {
+  width: 22px; height: 11px;
+  background: var(--border); border-radius: 4px; flex-shrink: 0;
+}
+
+/* ── Paytable ────────────────────────────────────────────────────────────── */
+.paytable {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.25rem 1.5rem;
+}
+.paytable h2, .history-section h2 {
+  font-size: .82rem; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--muted); margin-bottom: .75rem;
+}
+table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+thead tr { border-bottom: 1px solid var(--border); }
+th { text-align: left; padding: .4rem .5rem; color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; }
+td { padding: .45rem .5rem; }
+tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,.03); }
+.payout-cell { color: var(--gold); font-weight: 700; }
+
+/* ── Spin history ────────────────────────────────────────────────────────── */
+.history-section {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.25rem 1.5rem;
+}
+#history-list {
+  list-style: none;
+  display: flex; flex-direction: column; gap: .35rem;
+  max-height: 250px; overflow-y: auto;
+}
+/* Each new entry slides in from the left */
+#history-list li {
+  font-size: .8rem;
+  display: flex; align-items: center; gap: .5rem;
+  padding: .3rem .5rem; border-radius: 6px;
+  background: var(--surface);
+  animation: histSlide .25s ease-out;
+}
+@keyframes histSlide {
+  from { transform: translateX(-14px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+.hist-symbols { letter-spacing: 4px; font-size: 1rem; }
+.hist-bet     { color: var(--muted); font-size: .72rem; flex-shrink: 0; }
+.hist-result.win     { color: var(--green); }
+.hist-result.lose    { color: var(--red); }
+.hist-result.jackpot { color: var(--gold); font-weight: 700; }
+.hist-time    { margin-left: auto; color: var(--muted); font-size: .7rem; flex-shrink: 0; }
+
+/* ── Game-over overlay ───────────────────────────────────────────────────── */
+.game-over-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.88);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1rem; animation: fadeIn .4s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.game-over-overlay h2  { font-size: 2.5rem; color: var(--red); text-align: center; }
+.game-over-overlay p   { color: var(--muted); font-size: 1rem; text-align: center; max-width: 320px; }
+.game-over-overlay button {
+  margin-top: .5rem; padding: .75rem 2rem;
+  border-radius: 50px; border: none;
+  background: var(--accent); color: #fff;
+  font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: 1px;
+  transition: filter .2s;
+}
+.game-over-overlay button:hover { filter: brightness(1.2); }
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Responsive: tighter on small screens ───────────────────────────────── */
+@media (max-width: 520px) {
+  header h1     { font-size: 2rem; }
+  .machine-body { padding: 1rem; }
+  .lever-wrap   { width: 44px; }
+  .spin-btn     { padding: .7rem 1.3rem; font-size: .82rem; }
+}
