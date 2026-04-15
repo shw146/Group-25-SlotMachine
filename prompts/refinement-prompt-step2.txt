@@ -1,0 +1,1 @@
+refinement prompt: Make sure that this slot machine program has an interactable lever, previous spin logs, three lines of symbols that spin, flashy visuals, coin animations, sounds for wins losses and spins, put the code in separate HTML CSS and JS files with descriptive inline comments, and high contrast color themes
