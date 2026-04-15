@@ -13,3 +13,14 @@
 |Runs in browser?|Yes
 |App Quality Notes| Neon graphics are thematically appropraite, the sounds match well to the graphics, but there is no "restart" button built in once you have run out of tokens. It concatenated hallucination weirdly.  
 |Code Quality Notes| The documentations style is very inconsistent, with a lo of different commenting styles. Sometimes functions have documentation, sometimes they don't. Sometimes the comments are informative, sometimes they just repeat the function name.  
+
+#### Rubric Score
+
+| Category | Score |
+| :--- | :--- |
+| Functionality | 25/25 |
+| Code Quality | 19/20 |
+| Thematic Consistency | 24/25 |
+| Accessibility | 5/5 |
+| UI/UX | 24/25 |
+| **Total** | **97/100** |
