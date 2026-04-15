@@ -1,18 +1,18 @@
 |Field|Notes|
 |---|---|
 |Run ID|candidate-011|
-|Timestamp|12:28|
+|Timestamp|7:16|
 |Model + version string|Sonnet 4.6 2.1.205|
-|Input tokens|35|
-|Output tokens|33k|
-|Total tokens|33k|
-|Wall-clock time (s)|2 minute 8 seconds|
-|Tool-reported time (s)|2 minute 8 seconds|
+|Input tokens|11k|
+|Output tokens|43.4k|
+|Total tokens|54.4k|
+|Wall-clock time (s)|8 minute 29 seconds|
+|Tool-reported time (s)|8 minute 29 seconds|
 |Files produced|1|
-|Lines of code|228|
+|Lines of code|931|
 |Runs in browser?|Yes
-|App Quality Notes|The payout function works as intended and also keeps track of how much tokens you lost. The spin function works as intended and it also keeps track of the last 8 spins. There are also stakes to losing your tokens
-|Code Quality Notes|<style> was a bit hard to read but everything else was easy to track even though there was no documentation
+|App Quality Notes|
+|Code Quality Notes|
 
 ### Rubric Score
 
