@@ -11,16 +11,16 @@
 |Files produced|1|
 |Lines of code|931|
 |Runs in browser?|Yes
-|App Quality Notes| 
-|Code Quality Notes| 
+|App Quality Notes| It does not work. It shows a slot machine along with its score values, but nothing happens when i click any of the buttons
+|Code Quality Notes| There shows an error in the code around 574, where the paytable is.
 
 ### Rubric Score
 
 | Category             | Score |
 | --------             | ----- |
-| Functionality        | 19/25 |
-| Code Quality         | 18/20 |
-| Thematic Consistency | 15/25 |
-| Accessibility        | 3/5 |
-| UI/UX                | 15/25 |
-| **Total**            | 70/100 |
+| Functionality        | 0/25 |
+| Code Quality         | 10/20 |
+| Thematic Consistency | 0/25 |
+| Accessibility        | 1/5 |
+| UI/UX                | 0/25 |
+| **Total**            | 11/100 |
