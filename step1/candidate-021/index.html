@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokenSlot — The AI Casino</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <main class="cabinet">
+    <header class="cabinet-top">
+      <div class="marquee-wrap">
+        <span class="marquee-text">
+          ★ TOKEN SLOT ★ POWERED BY 100% GENUINE ARTIFICIAL INTELLIGENCE ★ NOT RESPONSIBLE FOR HALLUCINATIONS ★ TOKENS MAY OR MAY NOT BE REAL ★ AI DOES NOT GAMBLE (PROBABLY) ★
+        </span>
+      </div>
+      <h1 class="title">TOKEN<span>SLOT</span></h1>
+      <p class="subtitle">The Only Casino Where the House Has a 175B Parameter Edge</p>
+    </header>
+
+    <section class="token-bar">
+      <div class="token-display">
+        <span class="token-label">YOUR TOKENS</span>
+        <span class="token-count" id="tokenCount">100</span>
+        <span class="token-unit">tkns</span>
+      </div>
+      <div class="token-display cost-display">
+        <span class="token-label">COST PER SPIN</span>
+        <span class="token-count">10</span>
+        <span class="token-unit">tkns</span>
+      </div>
+    </section>
+
+    <section class="machine-body">
+      <div class="reel-window">
+        <div class="reel-shade left"></div>
+        <div class="reel-shade right"></div>
+
+        <div class="reels" id="reels">
+          <div class="reel-container">
+            <div class="reel" id="reel0">
+              <div class="symbol-strip" id="strip0"></div>
+            </div>
+          </div>
+          <div class="reel-container">
+            <div class="reel" id="reel1">
+              <div class="symbol-strip" id="strip1"></div>
+            </div>
+          </div>
+          <div class="reel-container">
+            <div class="reel" id="reel2">
+              <div class="symbol-strip" id="strip2"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="payline"></div>
+      </div>
+
+      <div class="message-box" id="messageBox">
+        <p id="messageText">Insert tokens to begin. The AI is ready to take your money.</p>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button class="btn-spin" id="spinBtn">
+        <span class="btn-label">SPIN</span>
+        <span class="btn-cost">— 10 tokens —</span>
+      </button>
+      <button class="btn-refill" id="refillBtn" title="Beg for more tokens">
+        + REFILL TOKENS
+      </button>
+    </section>
+
+    <section class="paytable">
+      <h2 class="paytable-title">PAYTABLE (Context Window Sold Separately)</h2>
+      <div class="paytable-grid" id="paytableGrid"></div>
+    </section>
+
+    <footer class="cabinet-footer">
+      <p>⚠ This machine uses AI. It may hallucinate your winnings. Past token performance does not predict future results. The model has 0 understanding of luck but 100% confidence in everything it says.</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
