@@ -20,9 +20,9 @@
 
 | Category | Score |
 | :--- | :--- |
-| Functionality | 25/25 |
-| Code Quality | 20/20 |
-| Thematic Consistency | 25/25 |
+| Functionality | 22/25 |
+| Code Quality | 19/20 |
+| Thematic Consistency | 23/25 |
 | Accessibility | 4/5 |
-| UI/UX | 25/25 |
-| **Total** | **99/100** |
+| UI/UX | 22/25 |
+| **Total** | **90/100** |
