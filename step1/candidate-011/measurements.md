@@ -11,7 +11,7 @@
 |Files produced|1|
 |Lines of code|931|
 |Runs in browser?|Yes
-|App Quality Notes|
+|App Quality Notes| There is no view of the wheel spinning or the actual results of the wheel. Some words are hard to read since they blend in.
 |Code Quality Notes|
 
 ### Rubric Score
