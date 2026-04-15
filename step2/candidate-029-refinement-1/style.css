@@ -1,0 +1,693 @@
+/* ============================================================
+   style.css — TokenSlot AI
+   Three high-contrast themes, slot machine layout, lever,
+   payline overlays, coin particles, and all animations.
+   ============================================================ */
+
+/* ── RESET & BOX MODEL ─────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── CSS CUSTOM PROPERTIES (THEME VARIABLES) ────────────────
+   Each [data-theme] block on <html> overrides these variables.
+   All color references in the rest of the file use var(--*)
+   so swapping the theme instantly recolors everything.
+   ─────────────────────────────────────────────────────────── */
+
+/* Theme 1 — Default: dark purple/blue casino atmosphere */
+:root,
+[data-theme="default"] {
+  --bg:        #06060f;
+  --surface:   #0e0e1f;
+  --border:    rgba(139, 92, 246, 0.28);
+  --accent:    #8b5cf6;
+  --accent2:   #6d28d9;
+  --cyan:      #06b6d4;
+  --gold:      #f59e0b;
+  --green:     #10b981;
+  --red:       #ef4444;
+  --text:      #e2e8f0;
+  --muted:     #64748b;
+  --cell:      90px;         /* height of one reel symbol cell */
+  --lever-bg:  #1a1a3e;
+  --lever-accent: #8b5cf6;
+  --light-a:   #f59e0b;
+  --light-b:   #8b5cf6;
+}
+
+/* Theme 2 — High Contrast Dark: pure black + neon yellow */
+[data-theme="hc-dark"] {
+  --bg:        #000000;
+  --surface:   #0d0d0d;
+  --border:    rgba(255, 235, 0, 0.45);
+  --accent:    #ffeb00;
+  --accent2:   #ccbc00;
+  --cyan:      #00ffee;
+  --gold:      #ffd700;
+  --green:     #00ff88;
+  --red:       #ff3333;
+  --text:      #ffffff;
+  --muted:     #bbbbbb;
+  --lever-bg:  #111100;
+  --lever-accent: #ffeb00;
+  --light-a:   #ffeb00;
+  --light-b:   #00ffee;
+}
+
+/* Theme 3 — High Contrast Light: white background, dark ink */
+[data-theme="hc-light"] {
+  --bg:        #f0f0f0;
+  --surface:   #ffffff;
+  --border:    rgba(0, 0, 0, 0.25);
+  --accent:    #1a00cc;
+  --accent2:   #0d0077;
+  --cyan:      #006688;
+  --gold:      #b06000;
+  --green:     #007700;
+  --red:       #cc0000;
+  --text:      #0a0a0a;
+  --muted:     #444444;
+  --lever-bg:  #e0e0e0;
+  --lever-accent: #1a00cc;
+  --light-a:   #cc0000;
+  --light-b:   #1a00cc;
+}
+
+/* ── BODY & LAYOUT ─────────────────────────────────────────── */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-x: hidden;
+  /* Smooth color transition when theme changes */
+  transition: background 0.4s, color 0.4s;
+}
+
+/* Starfield canvas sits behind all content */
+#canvas-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Flash overlay covers the full viewport; animated to opacity:0 on wins */
+#flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+}
+
+/* Root app container: single column, max 500px */
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── HEADER ─────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.header-text { flex: 1; }
+
+h1 {
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  /* Three-color gradient spanning the text */
+  background: linear-gradient(135deg, var(--accent), var(--cyan), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tagline {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* Theme cycle button — small, sits top-right */
+.theme-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.75rem;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+.theme-btn:hover { border-color: var(--accent); }
+
+/* ── BALANCE / TOKEN BAR ────────────────────────────────────── */
+.token-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.tok-group        { display: flex; flex-direction: column; gap: 2px; }
+.tok-group.align-end { align-items: flex-end; }
+.tok-label        { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.tok-val          { font-size: 1.4rem; font-weight: 700; }
+.tok-val.balance  { color: var(--gold); }
+.tok-val.burned   { color: var(--red); font-size: 1.1rem; }
+.tok-val small    { font-size: 0.7rem; font-weight: 400; }
+
+/* ── MACHINE CABINET ────────────────────────────────────────── */
+.machine {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 14px 14px 18px;
+  box-shadow: 0 0 60px rgba(139, 92, 246, 0.10),
+              inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: background 0.4s, border-color 0.4s;
+}
+
+/* ── MACHINE LIGHTS (decorative row along the cabinet top) ─── */
+.machine-lights {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* Each light is a small oval LED bulb */
+.light {
+  width: 14px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--light-a);
+  opacity: 0.3;
+  animation: light-pulse 1.8s ease-in-out infinite;
+  transition: background 0.4s;
+}
+
+/* Alternate lights use a different color for a two-tone effect */
+.light:nth-child(even) {
+  background: var(--light-b);
+  animation-delay: 0.9s;
+}
+
+@keyframes light-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 0.9;  }
+}
+
+/* When the cabinet is "celebrating" (jackpot), lights flash rapidly */
+.machine.celebrating .light {
+  animation: light-celebrate 0.15s linear infinite;
+}
+@keyframes light-celebrate {
+  0%   { opacity: 1;   }
+  50%  { opacity: 0.1; }
+  100% { opacity: 1;   }
+}
+
+/* ── MACHINE BODY (labels + reels + lever) ──────────────────── */
+.machine-body {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* ── PAYLINE LABELS (left sidebar) ─────────────────────────── */
+.payline-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 0;
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.pl-label {
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  text-align: right;
+  padding-right: 4px;
+  height: var(--cell);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-right: 2px solid rgba(139, 92, 246, 0.15);
+  transition: color 0.3s, border-color 0.3s;
+}
+
+/* Winning payline label turns gold */
+.pl-label.win {
+  color: var(--gold);
+  border-right-color: var(--gold);
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+/* ── REELS WRAPPER (reels + payline overlays) ───────────────── */
+.reels-wrapper {
+  flex: 1;
+  position: relative;
+  /* Clip the payline-row overlays to the reel area */
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+/* Three horizontal row-win overlays stacked to cover one cell each */
+.payline-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--cell);
+  pointer-events: none;
+  z-index: 4;
+  border: 1.5px solid rgba(139, 92, 246, 0.12);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.payline-row:nth-child(1) { top: 0; }
+.payline-row:nth-child(2) { top: var(--cell); }
+.payline-row:nth-child(3) { top: calc(var(--cell) * 2); }
+
+/* Winning row glows gold */
+.payline-row.win {
+  border-color: var(--gold);
+  background: rgba(245, 158, 11, 0.07);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.25) inset;
+  animation: row-win-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes row-win-pulse {
+  from { box-shadow: 0 0 12px rgba(245, 158, 11, 0.2) inset; }
+  to   { box-shadow: 0 0 28px rgba(245, 158, 11, 0.5) inset; }
+}
+
+/* ── THREE SPINNING REELS ───────────────────────────────────── */
+.reels {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.reel {
+  flex: 1;
+  /* Show exactly 3 symbol rows */
+  height: calc(var(--cell) * 3);
+  background: #060612;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Gradient fade at top/bottom edges to simulate depth */
+.reel::before,
+.reel::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 46px;
+  z-index: 2;
+  pointer-events: none;
+}
+.reel::before {
+  top: 0;
+  background: linear-gradient(to bottom, #060612 0%, transparent 100%);
+}
+.reel::after {
+  bottom: 0;
+  background: linear-gradient(to top, #060612 0%, transparent 100%);
+}
+
+/* The long scrolling strip of emoji symbols */
+.reel-track {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  flex-direction: column;
+  /* Default resting position; overridden by JS transform */
+  will-change: transform;
+}
+
+/* Individual symbol cell within the strip */
+.reel-cell {
+  height: var(--cell);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.6rem;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Reel glow when it's part of a winning combination */
+.reel.winning {
+  border-color: var(--gold);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.45),
+              inset 0 0 18px rgba(245, 158, 11, 0.06);
+}
+
+/* ── PULL LEVER ─────────────────────────────────────────────── */
+.lever-housing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 42px;
+}
+
+/* The vertical rail the lever arm slides within */
+.lever-track {
+  width: 18px;
+  height: calc(var(--cell) * 3);
+  background: var(--lever-bg);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 9px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* Lever arm; rotates around its top pivot point */
+.lever-arm {
+  position: absolute;
+  top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  /* Resting: tilted up like an un-pulled lever */
+  transform: rotate(-28deg);
+  transition: transform 0.12s ease-in;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* Pulled state: arm rotates down */
+.lever-arm.pulled {
+  transform: rotate(48deg);
+  transition: transform 0.08s ease-in;
+}
+
+/* The thin cylindrical shaft */
+.lever-shaft {
+  width: 7px;
+  height: 120px;
+  background: linear-gradient(
+    to right,
+    var(--lever-accent),
+    color-mix(in srgb, var(--lever-accent) 60%, white),
+    var(--lever-accent)
+  );
+  border-radius: 3px;
+  box-shadow: 0 0 8px var(--lever-accent);
+}
+
+/* The round handle at the end of the shaft */
+.lever-handle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff6b6b, #cc1111);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 12px rgba(220, 50, 50, 0.65),
+              inset 0 2px 4px rgba(255, 255, 255, 0.25);
+  cursor: grab;
+  transition: box-shadow 0.15s;
+  /* Slight offset so the handle is centered over the wider shaft */
+  margin-top: -2px;
+}
+
+.lever-arm:hover .lever-handle {
+  box-shadow: 0 0 20px rgba(220, 50, 50, 0.9),
+              inset 0 2px 4px rgba(255, 255, 255, 0.35);
+}
+
+.lever-arm.pulled .lever-handle {
+  cursor: grabbing;
+}
+
+/* Small "PULL" text label beneath the lever */
+.lever-label {
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── SPIN BUTTON & BET DISPLAY ─────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bet-box      { text-align: center; min-width: 68px; }
+.bet-label    { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.bet-val      { font-size: 1rem; font-weight: 700; color: var(--cyan); }
+
+.spin-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+  transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+}
+.spin-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(139, 92, 246, 0.55);
+}
+.spin-btn:active:not(:disabled) { transform: translateY(0); }
+.spin-btn:disabled               { opacity: 0.4; cursor: not-allowed; }
+
+/* ── RESULT MESSAGE BOX ─────────────────────────────────────── */
+.message-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.msg          { font-size: 0.88rem; color: var(--muted); font-style: italic; line-height: 1.4; }
+.msg.win      { color: var(--green); font-style: normal; font-weight: 600; }
+.msg.lose     { color: var(--red);   font-style: normal; }
+.msg.jackpot  {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 0.96rem;
+  animation: pulse-gold 0.55s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-gold {
+  from { text-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+  to   { text-shadow: 0 0 28px rgba(245, 158, 11, 1.0); }
+}
+
+/* ── PAY TABLE (collapsible <details>) ─────────────────────── */
+.paytable {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px 14px;
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.pay-hdr {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.pay-hdr::-webkit-details-marker { display: none; }
+
+.pay-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(139, 92, 246, 0.08);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+}
+
+.pay-mult { color: var(--gold); font-weight: 700; }
+
+/* ── STATS ROW ──────────────────────────────────────────────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.stat-val { font-size: 1.1rem; font-weight: 700; }
+.stat-lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 2px; }
+
+/* ── SPIN HISTORY LOG ───────────────────────────────────────── */
+.spin-log {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.clear-log-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 0.65rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.clear-log-btn:hover { border-color: var(--red); color: var(--red); }
+
+.log-entries {
+  max-height: 180px;
+  overflow-y: auto;
+  /* Custom scrollbar for dark theme */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.log-empty {
+  padding: 14px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+}
+
+/* One row per past spin */
+.log-entry {
+  display: grid;
+  grid-template-columns: 30px 1fr 70px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 0.78rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+  transition: background 0.2s;
+}
+.log-entry:hover { background: rgba(139, 92, 246, 0.06); }
+
+.log-num   { color: var(--muted); font-size: 0.65rem; text-align: right; }
+.log-syms  { letter-spacing: 2px; font-size: 1rem; }
+.log-result { text-align: right; font-weight: 700; }
+
+.log-entry.win  .log-result { color: var(--green); }
+.log-entry.lose .log-result { color: var(--red);   }
+.log-entry.jackpot .log-result { color: var(--gold); }
+
+/* ── PARTICLES ──────────────────────────────────────────────── */
+
+/* Coin particles spawned on win; positioned absolutely on body */
+.coin-particle {
+  position: fixed;
+  font-size: 1.4rem;
+  pointer-events: none;
+  z-index: 1000;
+  /* Individual motion applied via JS .animate() */
+}
+
+/* Generic emoji particles for jackpot burst */
+.particle {
+  position: fixed;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ── RESPONSIVE ADJUSTMENTS ─────────────────────────────────── */
+@media (max-width: 400px) {
+  :root { --cell: 76px; }
+
+  .reel-cell { font-size: 2.2rem; }
+
+  .lever-shaft { height: 96px; }
+
+  h1 { font-size: 1.6rem; }
+}
