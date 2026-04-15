@@ -1,6 +1,6 @@
 #FINAL REPORT
 
-WE used claude sonnet 4.6 version 2.1.108
+We used claude sonnet 4.6 version 2.1.108
 
 When given identical inputs, a coding agent is pretty inconsistent. With the 50 prototypes that we ran, we found some really good ones, some really bad ones, some that didn't work, and many of them used wildly different amomunts of tokens.
 
