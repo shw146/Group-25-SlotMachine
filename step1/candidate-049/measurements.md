@@ -2,7 +2,7 @@
 
 | Field               | Value                              |
 | ------------------- | ---------------------------------- |
-| Run ID              | candidate-U-4                      |
+| Run ID              | candidate-050                      |
 | Timestamp           | 2026-04-15T02:49:07.523Z           |
 | Model + version     | claude-sonnet-4-6                  |
 | Input tokens        | 8                                  |
