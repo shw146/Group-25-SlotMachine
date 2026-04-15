@@ -11,8 +11,8 @@
 |Files produced|1|
 |Lines of code|675|
 |Runs in browser?|Yes
-|App Quality Notes| 
-|Code Quality Notes| 
+|App Quality Notes| Spin wheel works as intended, but the wording describing the values and session info are hard to see.
+|Code Quality Notes| The code looks fine. It looks easy to look through and nothing jumps out as hard to read thanks to the documentation.
 
 ### Rubric Score
 
