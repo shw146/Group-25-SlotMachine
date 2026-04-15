@@ -13,8 +13,8 @@
 | Files produced | 1 |
 | Lines of code | 1723 |
 | Runs in browser? |yes|
-| App Quality Notes |  |
-| Code Quality Notes |  |
+| App Quality Notes | The lightness and colours are better. Lever works well and simple design. |
+| Code Quality Notes | There were more comments and we liked that. |
 
 #### Rubric Score
 
