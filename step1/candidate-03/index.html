@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Token Casino</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="casino-bg"></div>
+
+  <div class="container">
+    <header>
+      <h1>🤖 AI TOKEN CASINO</h1>
+      <p class="subtitle">Where your context window goes to die</p>
+    </header>
+
+    <div class="wallet">
+      <div class="wallet-item">
+        <span class="wallet-label">YOUR TOKENS</span>
+        <span class="wallet-value" id="balance">1000</span>
+      </div>
+      <div class="wallet-item">
+        <span class="wallet-label">TOKENS BURNED</span>
+        <span class="wallet-value burned" id="burned">0</span>
+      </div>
+      <div class="wallet-item">
+        <span class="wallet-label">TOKENS WON</span>
+        <span class="wallet-value won" id="won">0</span>
+      </div>
+    </div>
+
+    <div class="machine">
+      <div class="machine-top">
+        <div class="neon-sign">HALLUCINATION JACKPOT</div>
+      </div>
+
+      <div class="reels-container">
+        <div class="reel-wrapper">
+          <div class="reel" id="reel0">
+            <div class="reel-inner" id="reel-inner-0"></div>
+          </div>
+        </div>
+        <div class="reel-wrapper">
+          <div class="reel" id="reel1">
+            <div class="reel-inner" id="reel-inner-1"></div>
+          </div>
+        </div>
+        <div class="reel-wrapper">
+          <div class="reel" id="reel2">
+            <div class="reel-inner" id="reel-inner-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payline"></div>
+
+      <div class="result-display" id="result-display">
+        <span id="result-text">Insert tokens to play!</span>
+      </div>
+
+      <div class="controls">
+        <div class="bet-control">
+          <button class="btn btn-sm" id="bet-down">-</button>
+          <div class="bet-amount">
+            <span class="bet-label">BET</span>
+            <span id="bet-value">10</span>
+            <span class="bet-unit">tokens</span>
+          </div>
+          <button class="btn btn-sm" id="bet-up">+</button>
+        </div>
+
+        <button class="btn btn-spin" id="spin-btn">
+          <span class="spin-icon">⚙️</span>
+          SPIN (Burn Tokens)
+        </button>
+      </div>
+
+      <div class="quip" id="quip">
+        "I am not a gambling machine... I'm a stochastic token distributor."
+      </div>
+    </div>
+
+    <div class="paytable">
+      <h3>PAYTABLE</h3>
+      <table>
+        <thead>
+          <tr><th>Combo</th><th>Win</th><th>Quip</th></tr>
+        </thead>
+        <tbody id="paytable-body"></tbody>
+      </table>
+    </div>
+
+    <div class="history-panel">
+      <h3>AUDIT LOG <span class="blink">(for alignment)</span></h3>
+      <ul id="history-list"></ul>
+    </div>
+  </div>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-box">
+      <h2 id="modal-title"></h2>
+      <p id="modal-msg"></p>
+      <button class="btn btn-spin" id="modal-close">OK, fine</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
