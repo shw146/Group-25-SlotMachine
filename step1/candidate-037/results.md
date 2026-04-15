@@ -4,7 +4,7 @@
 |Timestamp|2026-04-14T23:31:20Z|
 |Model + version string|claude-sonnet-4-6-20241022 (Claude Code v2.1.92)|
 |Input tokens|380 tokens|
-|Output tokens|9.9k (Sonnet) + 16 (Haiku) = 9,916 tokens|
+|Output tokens|9.9k|
 |Total tokens|10.3k|
 |Wall-clock time (s)|1:51|
 |Tool-reported time (s)|1:50|
