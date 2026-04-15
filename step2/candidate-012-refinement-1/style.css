@@ -1,0 +1,578 @@
+/* =====================================================
+   LUCKY SLOTS — style.css
+   High-contrast neon theme on deep dark background
+   ===================================================== */
+
+/* ---- CSS CUSTOM PROPERTIES (color palette) ---- */
+:root {
+  --bg-deep:      #0a0010;     /* near-black purple background */
+  --bg-machine:   #130020;     /* machine body */
+  --bg-reel:      #1a0030;     /* reel column background */
+  --border-neon:  #cc00ff;     /* neon purple border */
+  --accent-gold:  #ffd700;     /* gold accent */
+  --accent-cyan:  #00eeff;     /* cyan neon */
+  --accent-pink:  #ff00aa;     /* hot pink */
+  --text-bright:  #ffffff;     /* primary text */
+  --text-dim:     #bb99cc;     /* secondary / labels */
+  --win-green:    #00ff88;     /* win color */
+  --loss-red:     #ff3344;     /* loss color */
+
+  /* timing tokens */
+  --reel-transition: 80ms;
+}
+
+/* ---- GLOBAL RESET & BASE ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-deep);
+  /* Animated radial gradient for ambient glow effect */
+  background-image: radial-gradient(ellipse at 50% 0%, #2a005a 0%, var(--bg-deep) 70%);
+  color: var(--text-bright);
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 12px 48px;
+}
+
+/* =====================================================
+   COIN SHOWER OVERLAY
+   Coins are absolutely-positioned <div>s injected by JS
+   ===================================================== */
+#coin-shower {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;    /* never block clicks */
+  z-index: 200;
+  overflow: hidden;
+}
+
+/* Individual animated coin */
+.coin {
+  position: absolute;
+  top: -60px;              /* start above viewport */
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffe066, #b8860b);
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 12px #ffd700, 0 0 24px #ffaa00;
+  animation: coinFall var(--fall-dur, 1.4s) ease-in var(--fall-delay, 0s) forwards;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes coinFall {
+  0%   { transform: translateY(0)   rotate(0deg);   opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* =====================================================
+   FLASH OVERLAY — full-screen white flash on jackpot
+   ===================================================== */
+#flash-overlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 300;
+  transition: opacity 60ms ease-out;
+}
+
+#flash-overlay.flash {
+  animation: flashPulse 0.5s ease-out forwards;
+}
+
+@keyframes flashPulse {
+  0%   { opacity: 0.9; }
+  100% { opacity: 0;   }
+}
+
+/* =====================================================
+   MACHINE WRAPPER
+   ===================================================== */
+.machine-wrapper {
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg-machine);
+  border: 3px solid var(--border-neon);
+  border-radius: 20px;
+  padding: 24px 20px 32px;
+
+  /* Double box-shadow: outer neon glow + inner shadow for depth */
+  box-shadow:
+    0 0 30px var(--border-neon),
+    0 0 80px #6600cc44,
+    inset 0 0 40px #00000066;
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+.machine-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* Animated neon sign title */
+.neon-title {
+  font-size: 2rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  text-shadow:
+    0 0 6px  var(--accent-cyan),
+    0 0 14px var(--accent-cyan),
+    0 0 30px #00bbdd;
+  animation: neonFlicker 4s infinite;
+}
+
+.neon-title .accent {
+  color: var(--accent-gold);
+  text-shadow:
+    0 0 6px  var(--accent-gold),
+    0 0 14px var(--accent-gold),
+    0 0 30px #ccaa00;
+}
+
+/* Subtle flicker to simulate neon tube */
+@keyframes neonFlicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 22%, 24%, 55%                      { opacity: 0.85; }
+}
+
+/* Credit counter box */
+.credit-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #000;
+  border: 2px solid var(--accent-gold);
+  border-radius: 8px;
+  padding: 6px 14px;
+  box-shadow: 0 0 10px var(--accent-gold);
+}
+
+.credit-display .label {
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--accent-gold);
+}
+
+.credit-display .value {
+  font-size: 1.6rem;
+  color: var(--accent-gold);
+  text-shadow: 0 0 8px var(--accent-gold);
+  min-width: 56px;
+  text-align: center;
+}
+
+/* =====================================================
+   REELS SECTION
+   Three side-by-side reel columns, each showing 3 rows
+   ===================================================== */
+.reels-section {
+  position: relative;          /* for win-line overlay */
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 10px;
+  background: #000;
+  border: 3px solid var(--border-neon);
+  border-radius: 12px;
+  box-shadow: inset 0 0 30px #1a004a;
+}
+
+/* ---- WIN LINE ---- */
+/* Horizontal bar spanning all three reels at the center row */
+.win-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent, var(--accent-gold), var(--accent-pink), var(--accent-gold), transparent);
+  opacity: 0.6;
+  pointer-events: none;
+  border-radius: 2px;
+  z-index: 2;
+}
+
+/* Win-line glows brighter on win */
+.win-line.active {
+  opacity: 1;
+  animation: winLineGlow 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes winLineGlow {
+  from { box-shadow: 0 0 4px var(--accent-gold), 0 0 8px var(--accent-gold); }
+  to   { box-shadow: 0 0 14px var(--accent-gold), 0 0 28px #ff8800; }
+}
+
+/* ---- REEL FRAME (visible window per column) ---- */
+.reel-frame {
+  flex: 1;
+  overflow: hidden;             /* clip symbols above/below window */
+  border: 2px solid #330066;
+  border-radius: 8px;
+  background: var(--bg-reel);
+  position: relative;
+}
+
+/* The reel strip itself: flex column of three symbol cells */
+.reel {
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--reel-transition) linear;
+  will-change: transform;
+}
+
+/* ---- SYMBOL CELLS ---- */
+.symbol {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  user-select: none;
+  transition: font-size 0.15s;
+}
+
+/* Ghost rows (top & bottom): slightly dimmed to suggest depth */
+.symbol.ghost {
+  opacity: 0.35;
+  filter: blur(1px);
+}
+
+/* Center (win-line) row: always full brightness */
+.symbol.center {
+  opacity: 1;
+  background: rgba(255,255,255,0.03);
+}
+
+/* Pulse animation on winning center symbols */
+.symbol.center.winner {
+  animation: symbolPop 0.4s ease-out forwards;
+}
+
+@keyframes symbolPop {
+  0%   { transform: scale(1);    filter: drop-shadow(0 0 0px #ffd700); }
+  50%  { transform: scale(1.4);  filter: drop-shadow(0 0 16px #ffd700); }
+  100% { transform: scale(1.15); filter: drop-shadow(0 0 6px #ffd700); }
+}
+
+/* Blur applied while reels are spinning fast */
+.reel-frame.spinning .symbol {
+  filter: blur(3px);
+}
+
+/* =====================================================
+   RESULT MESSAGE
+   ===================================================== */
+.result-message {
+  text-align: center;
+  min-height: 2rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  transition: color 0.3s;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.result-message.win  { color: var(--win-green); }
+.result-message.loss { color: var(--loss-red);  }
+.result-message.jackpot {
+  color: var(--accent-gold);
+  animation: jackpotPulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes jackpotPulse {
+  from { text-shadow: 0 0 10px var(--accent-gold), 0 0 20px var(--accent-gold); }
+  to   { text-shadow: 0 0 24px #ff8800, 0 0 48px #ff4400; }
+}
+
+/* =====================================================
+   CONTROLS AREA — lever + spin button
+   ===================================================== */
+.controls-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 20px;
+}
+
+/* ---- LEVER ---- */
+.lever-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Vertical track the lever ball slides along */
+.lever-track {
+  position: relative;
+  width: 14px;
+  height: 100px;
+  background: linear-gradient(180deg, #330044, #660066);
+  border-radius: 7px;
+  border: 2px solid var(--border-neon);
+  box-shadow: 0 0 8px var(--border-neon);
+  display: flex;
+  align-items: flex-start;    /* ball starts at top */
+  justify-content: center;
+  padding-top: 4px;
+}
+
+/* The interactive lever ball */
+.lever-ball {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff66ff, #880088);
+  border: 3px solid var(--accent-pink);
+  box-shadow: 0 0 12px var(--accent-pink), 0 0 24px var(--border-neon);
+  position: absolute;
+  top: 4px;
+  cursor: grab;
+  transition: top 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.2s;
+}
+
+/* Ball snaps to bottom when "pulled" */
+.lever-ball.pulled {
+  top: calc(100% - 36px);
+  cursor: grabbing;
+  box-shadow: 0 0 20px var(--accent-pink), 0 0 40px var(--border-neon);
+}
+
+/* Flat base below the track */
+.lever-base {
+  width: 40px;
+  height: 14px;
+  background: linear-gradient(180deg, #660066, #330044);
+  border-radius: 4px;
+  border: 2px solid var(--border-neon);
+  box-shadow: 0 0 8px var(--border-neon);
+}
+
+/* ---- SPIN BUTTON ---- */
+.spin-btn {
+  padding: 14px 36px;
+  font-size: 1.2rem;
+  font-family: inherit;
+  letter-spacing: 3px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #cc00ff, #8800bb);
+  color: #fff;
+  border: 3px solid var(--accent-pink);
+  border-radius: 12px;
+  cursor: pointer;
+
+  /* Outer glow to make button pop against dark bg */
+  box-shadow:
+    0 0 12px var(--border-neon),
+    0 0 24px #aa00dd,
+    inset 0 0 8px rgba(255,255,255,0.1);
+
+  transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+}
+
+.spin-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px var(--border-neon), 0 0 40px #cc00ff;
+}
+
+.spin-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 0 8px var(--border-neon);
+}
+
+/* Greyed-out state while spinning or broke */
+.spin-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.cost-hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+/* =====================================================
+   BET CONTROLS
+   ===================================================== */
+.bet-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.bet-controls .label {
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+}
+
+.bet-btn {
+  width: 34px;
+  height: 34px;
+  font-size: 1.2rem;
+  background: #1a003a;
+  color: var(--accent-cyan);
+  border: 2px solid var(--accent-cyan);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 0 6px var(--accent-cyan);
+}
+
+.bet-btn:hover { background: #330066; }
+.bet-btn:active { transform: scale(0.93); }
+
+.bet-value {
+  min-width: 38px;
+  text-align: center;
+  font-size: 1.4rem;
+  color: var(--accent-gold);
+  text-shadow: 0 0 8px var(--accent-gold);
+}
+
+.max-bet-btn {
+  padding: 6px 14px;
+  background: #1a002a;
+  color: var(--accent-gold);
+  border: 2px solid var(--accent-gold);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  box-shadow: 0 0 6px var(--accent-gold);
+  transition: background 0.15s;
+}
+
+.max-bet-btn:hover { background: #330022; }
+
+/* =====================================================
+   PAYOUT TABLE
+   ===================================================== */
+.payout-table {
+  background: #0e0020;
+  border: 2px solid var(--border-neon);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px var(--border-neon);
+}
+
+.payout-table summary {
+  cursor: pointer;
+  color: var(--accent-cyan);
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.payout-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.payout-table th {
+  color: var(--accent-gold);
+  border-bottom: 1px solid #440066;
+  padding: 4px 8px;
+  text-align: left;
+  letter-spacing: 1px;
+}
+
+.payout-table td {
+  padding: 4px 8px;
+  color: var(--text-bright);
+  border-bottom: 1px solid #220044;
+}
+
+.payout-table tr:last-child td { border-bottom: none; }
+
+/* =====================================================
+   HISTORY LOG
+   ===================================================== */
+.history-section {
+  background: #0a0018;
+  border: 2px solid #440066;
+  border-radius: 10px;
+  padding: 12px 16px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for dark theme */
+.history-section::-webkit-scrollbar      { width: 6px; }
+.history-section::-webkit-scrollbar-track { background: #1a003a; }
+.history-section::-webkit-scrollbar-thumb { background: var(--border-neon); border-radius: 3px; }
+
+.history-title {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.history-list {
+  list-style: none;
+}
+
+/* Each history entry */
+.history-list li {
+  padding: 5px 0;
+  border-bottom: 1px solid #220044;
+  font-size: 0.82rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-dim);
+}
+
+.history-list li:last-child { border-bottom: none; }
+
+.history-list li .h-symbols { font-size: 1rem; letter-spacing: 4px; }
+.history-list li .h-result.win     { color: var(--win-green); }
+.history-list li .h-result.loss    { color: var(--loss-red);  }
+.history-list li .h-result.jackpot { color: var(--accent-gold); }
+
+/* =====================================================
+   RESPONSIVE TWEAKS
+   ===================================================== */
+@media (max-width: 420px) {
+  .neon-title   { font-size: 1.4rem; }
+  .symbol       { font-size: 2.4rem; height: 76px; }
+  .spin-btn     { padding: 12px 24px; font-size: 1rem; }
+  .controls-area{ gap: 18px; }
+}

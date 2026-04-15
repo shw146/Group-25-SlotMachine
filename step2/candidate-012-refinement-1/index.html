@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucky Slots</title>
+  <!-- Link to external stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== COIN ANIMATION CONTAINER ===== -->
+  <!-- Coins are dynamically injected here by JS on win -->
+  <div id="coin-shower" aria-hidden="true"></div>
+
+  <!-- ===== FLASH OVERLAY ===== -->
+  <!-- Full-screen flash effect on win/jackpot, toggled by JS -->
+  <div id="flash-overlay" aria-hidden="true"></div>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="machine-wrapper">
+
+    <!-- --- MACHINE HEADER --- -->
+    <header class="machine-header">
+      <h1 class="neon-title">LUCKY <span class="accent">SLOTS</span></h1>
+      <div class="credit-display">
+        <span class="label">CREDITS</span>
+        <span id="credits" class="value">100</span>
+      </div>
+    </header>
+
+    <!-- --- REELS SECTION --- -->
+    <!-- Three columns, each showing three visible symbol rows -->
+    <section class="reels-section" aria-label="Slot reels">
+
+      <!-- Win-line overlay: the horizontal line across the middle row -->
+      <div class="win-line" id="win-line" aria-hidden="true"></div>
+
+      <!-- Reel 1 -->
+      <div class="reel-frame">
+        <div class="reel" id="reel-0">
+          <!-- Top ghost row (partially visible above the win line) -->
+          <div class="symbol ghost top" id="reel-0-top"></div>
+          <!-- CENTER (win) row -->
+          <div class="symbol center" id="reel-0-center"></div>
+          <!-- Bottom ghost row -->
+          <div class="symbol ghost bottom" id="reel-0-bot"></div>
+        </div>
+      </div>
+
+      <!-- Reel 2 -->
+      <div class="reel-frame">
+        <div class="reel" id="reel-1">
+          <div class="symbol ghost top" id="reel-1-top"></div>
+          <div class="symbol center" id="reel-1-center"></div>
+          <div class="symbol ghost bottom" id="reel-1-bot"></div>
+        </div>
+      </div>
+
+      <!-- Reel 3 -->
+      <div class="reel-frame">
+        <div class="reel" id="reel-2">
+          <div class="symbol ghost top" id="reel-2-top"></div>
+          <div class="symbol center" id="reel-2-center"></div>
+          <div class="symbol ghost bottom" id="reel-2-bot"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- --- RESULT MESSAGE --- -->
+    <div class="result-message" id="result-msg" role="status" aria-live="polite"></div>
+
+    <!-- --- LEVER + SPIN BUTTON AREA --- -->
+    <div class="controls-area">
+
+      <!-- Interactive lever (click to pull / drag supported) -->
+      <div class="lever-wrapper" id="lever-wrapper" title="Pull the lever!">
+        <div class="lever-track">
+          <!-- Lever ball (draggable) -->
+          <div class="lever-ball" id="lever-ball" role="button" tabindex="0"
+               aria-label="Pull lever to spin"></div>
+        </div>
+        <!-- Lever base -->
+        <div class="lever-base"></div>
+      </div>
+
+      <!-- Alternatively click the big SPIN button -->
+      <button id="spin-btn" class="spin-btn" aria-label="Spin the reels">
+        SPIN <span class="cost-hint">(−1)</span>
+      </button>
+
+    </div>
+
+    <!-- --- BET CONTROLS --- -->
+    <div class="bet-controls">
+      <span class="label">BET</span>
+      <button class="bet-btn" id="bet-down" aria-label="Decrease bet">−</button>
+      <span id="bet-amount" class="bet-value">1</span>
+      <button class="bet-btn" id="bet-up" aria-label="Increase bet">+</button>
+      <button class="max-bet-btn" id="max-bet">MAX BET</button>
+    </div>
+
+    <!-- --- PAYOUT TABLE --- -->
+    <details class="payout-table" open>
+      <summary>Payout Table</summary>
+      <table>
+        <thead><tr><th>Combo</th><th>Win (× bet)</th></tr></thead>
+        <tbody id="payout-body">
+          <!-- Filled dynamically by JS from SYMBOLS config -->
+        </tbody>
+      </table>
+    </details>
+
+    <!-- --- SPIN HISTORY LOG --- -->
+    <section class="history-section" aria-label="Spin history">
+      <h2 class="history-title">Previous Spins</h2>
+      <ul id="history-list" class="history-list" aria-live="polite">
+        <!-- Entries prepended by JS after each spin -->
+      </ul>
+    </section>
+
+  </div><!-- /.machine-wrapper -->
+
+  <!-- Link to external JS (deferred so DOM is ready) -->
+  <script src="slots.js" defer></script>
+</body>
+</html>
