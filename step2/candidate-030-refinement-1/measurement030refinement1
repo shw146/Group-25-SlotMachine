@@ -1,1 +1,26 @@
+|Field|Notes|
+|---|---|
+|Run ID|candidate-030-refinement-1|
+|Timestamp|22:36:31|
+|Model + version string|Sonnet 4.6 2.1.205|
+|Input tokens|6.2k|
+|Output tokens|68.5k|
+|Total tokens|62.3k|
+|Wall-clock time (s)|9 minutes ~22 seconds|
+|Tool-reported time (s)|9 minutes 22 seconds|
+|Files produced|1|
+|Lines of code|945|
+|Runs in browser?|Yes|
+|App Quality Notes|Lever is purely decorational and does not work. The colours are still too dark and text is hard to read. There is sound present and pretty detailed.
+|Code Quality Notes|The CSS, HTML, and JS are all in the same file, which makes the code a bit hard to read. Comments exist but lack a lot of details.
 
+### Score By Rubric
+
+| Category             | Score  |
+| -------------------- | ------ |
+| Functionality        | 20/25  |
+| Code Quality         | 15/20  |
+| Thematic Consistency | 20/25  |
+| Accessibility        | 3/5    |
+| UI/UX                | 19/25  |
+| **Total**            | 77/100 |
